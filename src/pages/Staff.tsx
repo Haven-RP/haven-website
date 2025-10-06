@@ -143,9 +143,9 @@ const Staff = () => {
 
   // Group staff by their ranks
   const ranks = {
-    "Senior Admin": staffMembers.filter((member) => member.rank === "Senior Admin"),
-    Admin: staffMembers.filter((member) => member.rank === "Admin"),
-    Moderator: staffMembers.filter((member) => member.rank === "Moderator"),
+    "Senior Administration Team": staffMembers.filter((member) => member.rank === "Senior Admin"),
+    "Administration Team": staffMembers.filter((member) => member.rank === "Admin"),
+    "Moderation Team": staffMembers.filter((member) => member.rank === "Moderator"),
   };
 
   return (
