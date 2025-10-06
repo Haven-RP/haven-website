@@ -10,7 +10,7 @@ export const siteConfig = {
   newsTicker: [
     {
       date: "2025-10-19T00:00:00Z",
-      event: "Community Meeting in Discord",
+      event: "Flying High Race",
     }
   ],
 
