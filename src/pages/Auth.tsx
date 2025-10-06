@@ -41,10 +41,7 @@ const Auth = () => {
 
   const signInWithDiscord = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        redirectTo: `${window.location.origin}/`
-      }
+      provider: 'discord'
     });
     
     if (error) {
