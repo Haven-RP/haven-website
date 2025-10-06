@@ -210,6 +210,32 @@ const Staff = () => {
                     </div>
                   </section>
               ))}
+              {/* Join Staff CTA */}
+              <div className="mt-16 bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg p-8 text-center border-2 border-accent/30">
+                <Shield className="w-16 h-16 text-accent mx-auto mb-4" />
+                <h2 className="text-2xl font-heading font-bold mb-4 text-accent">
+                  Interested in Joining Our Team?
+                </h2>
+                <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                  We're always looking for dedicated individuals to join our staff team.
+                  Staff applications open periodically - join our Discord to stay updated
+                  on recruitment opportunities.
+                </p>
+                <Button
+                    size="lg"
+                    className="bg-gradient-purple-blue hover:shadow-neon-purple transition-all duration-300"
+                    asChild
+                >
+                  <a
+                      href={siteConfig.discordInvite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                  >
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Join Our Discord
+                  </a>
+                </Button>
+              </div>
             </div>
           </main>
           <Footer />
