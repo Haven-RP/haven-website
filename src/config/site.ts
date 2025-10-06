@@ -5,7 +5,15 @@ export const siteConfig = {
   // FiveM Server
   cfxCode: "kbv7mv", // Your CFX.re server code
   fivemConnect: "cfx.re/join/kbv7mv",
-  
+
+  // Ticker Scrollbar
+  newsTicker: [
+    {
+      date: "2025-10-19T00:00:00Z",
+      event: "Community Meeting in Discord",
+    }
+  ],
+
   // Discord
   discordInvite: "https://discord.gg/havenrp",
   discordGuildId: "1381585365466611732", // For widget API
