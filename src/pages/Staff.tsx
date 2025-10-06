@@ -25,14 +25,6 @@ const Staff = () => {
       bio: "Our behind-the-scenes wizard handling the city's finances and making sure gang administration stays on track.",
     },
     {
-      name: "Megs",
-      role: "Public Relations",
-      icon: MessageSquare,
-      color: "text-accent",
-      borderColor: "border-accent/30",
-      bio: "Got an issue? Megs has your back! She's the face of public relations, handling Discord chaos and keeping the community connected.",
-    },
-    {
       name: "Bryan",
       role: "Server Development",
       icon: Code,

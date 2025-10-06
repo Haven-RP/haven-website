@@ -7,7 +7,7 @@ export const siteConfig = {
   fivemConnect: "cfx.re/join/kbv7mv",
   
   // Discord
-  discordInvite: "https://discord.gg/ghfpKz5pHw",
+  discordInvite: "https://discord.gg/havenrp",
   discordGuildId: "1381585365466611732", // For widget API
   
   // AppyBot Application
