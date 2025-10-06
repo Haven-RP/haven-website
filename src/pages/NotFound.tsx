@@ -9,22 +9,27 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-gray-600">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 underline hover:text-blue-700">
-          Return to Home
-        </a>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <h1 className="mb-4 text-4xl font-bold">404</h1>
+          <p className="mb-4 text-xl text-gray-600">Oops! Page not found</p>
+          <a href="/" className="text-blue-500 underline hover:text-blue-700">
+            Return to Home
+          </a>
+        </div>
+
+        <pre className="mt-8 text-left text-xs bg-gray-900 text-white p-4 rounded">
+        {JSON.stringify(
+            {
+              url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+              key: process.env.NEXT_PUBLIC_SUPABASE_KEY ? "✔️ Loaded" : "❌ Missing",
+              nodeEnv: process.env.NODE_ENV,
+            },
+            null,
+            2
+        )}
+      </pre>
       </div>
-    </div>
-  <pre>
-      {JSON.stringify({
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        key: process.env.NEXT_PUBLIC_SUPABASE_KEY ? '✔️ Loaded' : '❌ Missing',
-        nodeEnv: process.env.NODE_ENV,
-      }, null, 2)}
-    </pre>
   );
 };
 
