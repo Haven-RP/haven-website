@@ -63,22 +63,17 @@ const About = () => {
             </h2>
             <div className="space-y-4 text-foreground/90 leading-relaxed">
               <p>
-                HavenRP was founded in 2024 by a dedicated group of roleplay enthusiasts who 
+                HavenRP was founded in 2025 by a dedicated group of roleplay enthusiasts who
                 envisioned a server where quality storytelling and immersive experiences take 
                 center stage. Frustrated with the lack of serious roleplay servers that balanced 
                 realism with fun, we set out to create something different.
               </p>
               <p>
-                What started as a small community of 50 players has grown into a thriving city 
-                of hundreds, all united by a shared passion for creating memorable stories and 
+                What started as a small community of 5 players is slowly growing into a thriving city,
+                all united by a shared passion for creating memorable stories and
                 authentic character development. Our city is built on the foundation of mutual 
                 respect, creative freedom, and a commitment to maintaining the highest standards 
                 of roleplay.
-              </p>
-              <p>
-                Today, HavenRP stands as a beacon for serious roleplay in the FiveM community, 
-                featuring custom-developed systems, a dedicated staff team, and a vibrant player 
-                base that brings Los Santos to life every single day.
               </p>
             </div>
           </div>
@@ -131,7 +126,6 @@ const About = () => {
                   <li>• Regular community events and tournaments</li>
                   <li>• Player-driven storylines and factions</li>
                   <li>• Active Discord with 24/7 support</li>
-                  <li>• Whitelist system ensuring quality players</li>
                 </ul>
               </div>
               <div>
@@ -150,7 +144,7 @@ const About = () => {
                   Technical Excellence
                 </h3>
                 <ul className="space-y-2 text-foreground/90">
-                  <li>• High-performance dedicated servers</li>
+                  <li>• High-performance dedicated server</li>
                   <li>• 99.9% uptime guarantee</li>
                   <li>• Regular updates and optimizations</li>
                   <li>• Advanced anti-cheat protection</li>
@@ -159,28 +153,25 @@ const About = () => {
             </div>
           </div>
 
-          {/* Screenshots Placeholder */}
-          <div className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg p-8">
-            <h2 className="text-3xl font-heading font-bold mb-6 text-primary text-center">
-              Server Screenshots
-            </h2>
-            <p className="text-center text-muted-foreground mb-6">
-              Experience the immersive world of HavenRP
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-video bg-gradient-neon rounded-lg opacity-20 flex items-center justify-center"
-                >
-                  <span className="text-black font-heading font-bold">Screenshot {i}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Add your own server screenshots by replacing these placeholders
-            </p>
-          </div>
+          {/*/!* Screenshots Placeholder *!/*/}
+          {/*<div className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg p-8">*/}
+          {/*  <h2 className="text-3xl font-heading font-bold mb-6 text-primary text-center">*/}
+          {/*    Server Screenshots*/}
+          {/*  </h2>*/}
+          {/*  <p className="text-center text-muted-foreground mb-6">*/}
+          {/*    Experience the immersive world of HavenRP*/}
+          {/*  </p>*/}
+          {/*  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">*/}
+          {/*    {[1, 2, 3, 4, 5, 6].map((i) => (*/}
+          {/*      <div*/}
+          {/*        key={i}*/}
+          {/*        className="aspect-video bg-gradient-neon rounded-lg opacity-20 flex items-center justify-center"*/}
+          {/*      >*/}
+          {/*        <span className="text-black font-heading font-bold">Screenshot {i}</span>*/}
+          {/*      </div>*/}
+          {/*    ))}*/}
+          {/*  </div>*/}
+          {/*</div>*/}
         </div>
       </main>
 
