@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* HavenRP Futuristic Neon Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    /* Pure Black Background */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    /* Neon Cyan Primary */
+    --primary: 187 100% 50%;
+    --primary-bright: 187 100% 55%;
+    --primary-foreground: 0 0% 0%;
+
+    /* Electric Magenta Secondary */
+    --secondary: 291 100% 50%;
+    --secondary-bright: 300 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Deep Purple Accent */
+    --accent: 271 76% 53%;
+    --accent-bright: 271 80% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Accent Blue */
+    --blue-accent: 199 100% 50%;
+    --blue-accent-bright: 199 100% 55%;
+
+    /* Card glassmorphism */
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 10%;
+    --ring: 187 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Neon Glow Shadows */
+    --glow-cyan: 0 0 20px hsl(187 100% 50% / 0.5), 0 0 40px hsl(187 100% 50% / 0.3);
+    --glow-magenta: 0 0 20px hsl(291 100% 50% / 0.5), 0 0 40px hsl(291 100% 50% / 0.3);
+    --glow-purple: 0 0 20px hsl(271 76% 53% / 0.5), 0 0 40px hsl(271 76% 53% / 0.3);
+    --glow-blue: 0 0 20px hsl(199 100% 50% / 0.5), 0 0 40px hsl(199 100% 50% / 0.3);
+
+    /* Gradients */
+    --gradient-neon: linear-gradient(135deg, hsl(187 100% 50%), hsl(291 100% 50%));
+    --gradient-purple-blue: linear-gradient(135deg, hsl(271 76% 53%), hsl(199 100% 50%));
+    --gradient-overlay: linear-gradient(180deg, hsl(0 0% 0% / 0.8), hsl(0 0% 0% / 0.95));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Glassmorphic Card - More transparent to show background */
+  .glass-card {
+    @apply bg-card/20 backdrop-blur-xl border border-white/10 rounded-xl;
+  }
+
+  /* Neon Text Glow */
+  .text-neon-cyan {
+    @apply text-primary;
+    text-shadow: var(--glow-cyan);
+  }
+
+  .text-neon-magenta {
+    @apply text-secondary;
+    text-shadow: var(--glow-magenta);
+  }
+
+  .text-neon-purple {
+    @apply text-accent;
+    text-shadow: var(--glow-purple);
+  }
+
+  /* Scrolling Animation */
+  @keyframes scroll-right-to-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll {
+    animation: scroll-right-to-left 15s linear infinite;
+  }
+
+  .animate-scroll:hover {
+    animation-play-state: paused;
+  }
+
+  /* Fade in animations */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+
+  /* Floating animation for logo */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
