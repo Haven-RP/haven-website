@@ -37,4 +37,5 @@ export const siteConfig = {
   // Meta
   metaTitle: "HavenRP — Serious FiveM Roleplay",
   metaDescription: "FiveM roleplay city with active staff, economy, factions, and community events.",
+  metaKeywords: ""
 };
