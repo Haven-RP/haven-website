@@ -1,0 +1,8 @@
+﻿{
+  "rewrites": [
+    {
+      "source": "/(.*)",   // Matches all routes
+      "destination": "/"   // Redirects every route to `index.html`
+    }
+  ]
+}
