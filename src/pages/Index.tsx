@@ -52,9 +52,9 @@ const Index = () => {
               className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300 text-lg px-8 py-6"
               asChild
             >
-              <a href="/apply">
+              <a href="/join">
                 <FileCheck className="w-5 h-5 mr-2" />
-                Apply Now
+                Join Now
               </a>
             </Button>
             <Button

@@ -17,7 +17,7 @@ export const Navigation = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Rules", path: "/rules" },
-    { name: "Apply", path: "/apply" },
+    { name: "Join", path: "/join" },
     { name: "About", path: "/about" },
     { name: "Staff", path: "/staff" },
     { name: "Store", path: "https://store.haven-rp.com/", external: true },
