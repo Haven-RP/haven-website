@@ -1,7 +1,6 @@
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { StatsStrip } from "@/components/StatsStrip";
-import { ScrollingBar } from "@/components/ScrollingBar";
 import { FeatureTiles } from "@/components/FeatureTiles";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, FileCheck, Gamepad2 } from "lucide-react";
@@ -71,9 +70,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Scrolling Bar */}
-      <ScrollingBar />
 
       {/* Stats Strip */}
       <div className="container mx-auto px-4">

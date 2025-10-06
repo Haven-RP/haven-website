@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { MessageSquare, Gamepad2, LogIn, LogOut, Menu } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { ScrollingBar } from "@/components/ScrollingBar";
 import havenLogo from "@/assets/haven-logo.png";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -227,6 +228,8 @@ export const Navigation = () => {
             </Sheet>
           </div>
         </div>
+        {/* Add ScrollingBar Here */}
+        <ScrollingBar />
       </div>
     </nav>
   );
