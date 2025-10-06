@@ -11,6 +11,7 @@ const Staff = () => {
     {
       name: "Solao",
       role: "The Sky Boss",
+      avatar: "https://cdn.discordapp.com/avatars/178543347424690176/3cef10682089ec2ae632e8d0d4e20272.png",
       icon: Crown,
       color: "text-primary",
       borderColor: "border-primary/30",
@@ -130,7 +131,15 @@ const Staff = () => {
               >
                 <div className="flex items-start gap-4 mb-4">
                   <div className={`p-3 rounded-lg bg-card/50 border ${member.borderColor}`}>
-                    <member.icon className={`w-8 h-8 ${member.color}`} />
+                    {member.avatar ? (
+                        <img
+                            src={member.avatar}
+                            alt="Member Avatar"
+                            className="w-8 h-8 rounded-full"
+                        />
+                    ) : (
+                        <member.icon className={`w-8 h-8 ${member.color}`} />
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-heading font-bold text-foreground">
@@ -146,21 +155,21 @@ const Staff = () => {
                   {member.bio}
                 </p>
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className={`w-full border-${member.color} ${member.color} hover:bg-card/50`}
-                  asChild
-                >
-                  <a
-                    href={siteConfig.discordInvite}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Contact on Discord
-                  </a>
-                </Button>
+                {/*<Button*/}
+                {/*  size="sm"*/}
+                {/*  variant="outline"*/}
+                {/*  className={`w-full border-${member.color} ${member.color} hover:bg-card/50`}*/}
+                {/*  asChild*/}
+                {/*>*/}
+                {/*  <a*/}
+                {/*    href={siteConfig.discordInvite}*/}
+                {/*    target="_blank"*/}
+                {/*    rel="noopener noreferrer"*/}
+                {/*  >*/}
+                {/*    <MessageSquare className="w-4 h-4 mr-2" />*/}
+                {/*    Contact on Discord*/}
+                {/*  </a>*/}
+                {/*</Button>*/}
               </div>
             ))}
           </div>
