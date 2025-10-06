@@ -228,9 +228,9 @@ export const Navigation = () => {
             </Sheet>
           </div>
         </div>
-        {/* Add ScrollingBar Here */}
-        <ScrollingBar />
       </div>
+      {/* Add ScrollingBar Here */}
+      <ScrollingBar />
     </nav>
   );
 };
