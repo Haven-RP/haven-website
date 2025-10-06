@@ -21,7 +21,7 @@ export const siteConfig = {
   
   // Social Links
   reddit: "https://www.reddit.com/r/HavenRP/",
-  tiktok: "https://www.tiktok.com/@havenrp92?_t=ZT-8zmZLJeW8Cc&_r=1",
+  tiktok: "https://www.tiktok.com/@_haven_rp_",
   youtube: "https://www.youtube.com/@Haven-City",
   medal: "https://medal.tv/games/gta-v/servers/2OzMbwRQJ6UhFJ/haven-rp-discordgg-havenrp",
   twitter: "",
