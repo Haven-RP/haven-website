@@ -21,6 +21,7 @@ export const Navigation = () => {
     { name: "About", path: "/about" },
     { name: "Staff", path: "/staff" },
     { name: "Store", path: "https://store.haven-rp.com/", external: true },
+    { name: "Merch", path: "https://merch.haven-rp.com/", external: true },
   ];
 
   const isActive = (path: string) => location.pathname === path;
