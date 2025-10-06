@@ -24,7 +24,7 @@ export const siteConfig = {
   
   // Server Info
   serverName: "HavenRP",
-  serverTagline: "Serious Stories. Futuristic Vibes.",
+  serverTagline: "Serious Stories. Serious Fun.",
   maxPlayers: 256,
   
   // Social Links
@@ -36,5 +36,5 @@ export const siteConfig = {
   
   // Meta
   metaTitle: "HavenRP — Serious FiveM Roleplay",
-  metaDescription: "Futuristic, whitelist-based FiveM roleplay with active staff, economy, factions, and community events.",
+  metaDescription: "FiveM roleplay city with active staff, economy, factions, and community events.",
 };
