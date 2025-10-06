@@ -230,7 +230,7 @@ export const Navigation = () => {
         </div>
       </div>
       {/* Add ScrollingBar Here */}
-      <ScrollingBar />
+      <ScrollingBar className="mt-4" />
     </nav>
   );
 };
