@@ -22,7 +22,7 @@ export const StatsStrip = () => {
       value: discordLoading
         ? "..."
         : discordStats?.available
-        ? `${discordStats.online} Online`
+        ? `${discordStats.online}/${discordStats.total} Online`
         : "Join Discord",
       color: "text-secondary",
       glow: "shadow-neon-magenta",
