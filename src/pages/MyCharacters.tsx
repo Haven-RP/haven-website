@@ -75,7 +75,7 @@ const MyCharacters = () => {
       setUser(session?.user ?? null);
 
       if (!session) {
-        navigate("/auth");
+        navigate("/");
       } else {
         // Extract Discord user ID
         const discordId =
@@ -94,7 +94,7 @@ const MyCharacters = () => {
       setUser(session?.user ?? null);
 
       if (!session) {
-        navigate("/auth");
+        navigate("/");
       }
     });
 

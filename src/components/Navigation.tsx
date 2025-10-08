@@ -54,6 +54,19 @@ export const Navigation = () => {
     navigate("/");
   };
 
+  const handleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${window.location.origin}/`
+      }
+    });
+    
+    if (error) {
+      console.error("Error signing in with Discord:", error.message);
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-primary/20">
       <div className="container mx-auto px-4 py-4">
@@ -153,12 +166,10 @@ export const Navigation = () => {
                   variant="secondary"
                   size="sm"
                   className="transition-all duration-300"
-                  asChild
+                  onClick={handleSignIn}
                 >
-                  <Link to="/auth">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Link>
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
                 </Button>
               )}
               
@@ -275,12 +286,13 @@ export const Navigation = () => {
                         variant="secondary"
                         size="sm"
                         className="transition-all duration-300 w-full"
-                        asChild
+                        onClick={() => {
+                          handleSignIn();
+                          setMobileMenuOpen(false);
+                        }}
                       >
-                        <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                          <LogIn className="w-4 h-4 mr-2" />
-                          Sign In
-                        </Link>
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Sign In
                       </Button>
                     )}
                     

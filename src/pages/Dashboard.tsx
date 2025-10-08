@@ -34,7 +34,7 @@ const Members = () => {
                 setUser(session?.user ?? null);
 
                 if (!session) {
-                    navigate("/auth");
+                    navigate("/");
                 } else {
                     // Extract Discord user ID from provider metadata
                     const discordId = session.user.user_metadata?.provider_id || 
@@ -52,7 +52,7 @@ const Members = () => {
             setUser(session?.user ?? null);
 
             if (!session) {
-                navigate("/auth");
+                navigate("/");
             } else {
                 // Extract Discord user ID from provider metadata
                 const discordId = session.user.user_metadata?.provider_id || 
