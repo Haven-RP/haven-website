@@ -28,10 +28,19 @@ Add the environment variable in Vercel:
 
 1. Go to your project in Vercel dashboard
 2. Navigate to **Settings** → **Environment Variables**
-3. Add `VITE_TEBEX_PUBLIC_TOKEN` with your token
-4. Select all environments (Production, Preview, Development)
-5. Click **Save**
-6. Redeploy your project
+3. Add **TWO** variables (serverless functions will try both):
+   - Name: `TEBEX_PUBLIC_TOKEN` (preferred for serverless)
+   - Value: your-tebex-public-token
+   - Environments: Production, Preview, Development
+   
+   AND
+   
+   - Name: `VITE_TEBEX_PUBLIC_TOKEN` (for Vite client if needed)
+   - Value: your-tebex-public-token  
+   - Environments: Production, Preview, Development
+4. Click **Save** for each
+5. **Important:** Go to **Deployments** and click "Redeploy" on the latest deployment
+   - Or push a new commit to trigger redeployment
 
 ## Step 3: Update Site Configuration
 
