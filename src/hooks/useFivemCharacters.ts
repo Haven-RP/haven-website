@@ -96,7 +96,7 @@ export const useFivemCharacters = (discordId: string | null | undefined) => {
 
       try {
         const response = await fetch(
-          `${FIVEM_API_URL}/fivem/user/discord:${discordId}/characters`,
+          `${FIVEM_API_URL}/fivem/user/${discordId}/characters`,
           {
             method: "GET",
             headers: {

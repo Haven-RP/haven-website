@@ -52,7 +52,7 @@ The My Characters page displays all characters associated with the logged-in use
 
 ### Characters List Endpoint
 ```
-GET https://api.haven-rp.com/api/fivem/user/discord:{discordId}/characters
+GET https://api.haven-rp.com/api/fivem/user/{discordId}/characters
 Headers:
   - accept: application/json
   - X-API-Key: {VITE_HAVEN_API_KEY}
@@ -64,7 +64,7 @@ Headers:
   "success": true,
   "message": "Retrieved X character(s)",
   "data": {
-    "discord_id": "discord:123456789",
+    "discord_id": "123456789",
     "character_count": 2,
     "characters": [...]
   }
