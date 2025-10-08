@@ -1,6 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { MessageSquare, Gamepad2, LogIn, LogOut, Menu } from "lucide-react";
+import { MessageSquare, Gamepad2, LogIn, LogOut, Menu, User as UserIcon, ChevronDown } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { ScrollingBar } from "@/components/ScrollingBar";
 import havenLogo from "@/assets/haven-logo.png";
@@ -8,9 +8,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -22,11 +31,6 @@ export const Navigation = () => {
     { name: "Staff", path: "/staff" },
     { name: "Store", path: "https://store.haven-rp.com/", external: true },
     { name: "Merch", path: "https://merch.haven-rp.com/", external: true },
-  ];
-
-  const authNavLinks = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "My Characters", path: "/my-characters" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -47,6 +51,7 @@ export const Navigation = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    navigate("/");
   };
 
   return (
@@ -83,19 +88,6 @@ export const Navigation = () => {
                 </Link>
               )
             ))}
-            {user && authNavLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`font-medium transition-all duration-300 ${
-                  isActive(link.path)
-                    ? "text-secondary"
-                    : "text-foreground/70 hover:text-secondary"
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
           </div>
 
           <div className="flex items-center gap-3">
@@ -115,16 +107,47 @@ export const Navigation = () => {
                   Discord
                 </a>
               </Button>
+              
               {user ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="transition-all duration-300"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="transition-all duration-300"
+                    >
+                      <UserIcon className="w-4 h-4 mr-2" />
+                      Account
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-lg border-primary/30">
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                      {user.email}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/dashboard")}
+                      className="cursor-pointer hover:bg-primary/20 focus:bg-primary/20"
+                    >
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/my-characters")}
+                      className="cursor-pointer hover:bg-primary/20 focus:bg-primary/20"
+                    >
+                      My Characters
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem 
+                      onClick={handleSignOut}
+                      className="cursor-pointer hover:bg-destructive/20 focus:bg-destructive/20 text-destructive"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button
                   variant="secondary"
@@ -138,6 +161,7 @@ export const Navigation = () => {
                   </Link>
                 </Button>
               )}
+              
               <Button
                 size="sm"
                 className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
@@ -187,25 +211,6 @@ export const Navigation = () => {
                       </Link>
                     )
                   ))}
-                  {user && (
-                    <>
-                      <div className="border-t border-primary/20 my-2"></div>
-                      {authNavLinks.map((link) => (
-                        <Link
-                          key={link.path}
-                          to={link.path}
-                          className={`font-medium transition-all duration-300 py-2 ${
-                            isActive(link.path)
-                              ? "text-secondary"
-                              : "text-foreground/70 hover:text-secondary"
-                          }`}
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {link.name}
-                        </Link>
-                      ))}
-                    </>
-                  )}
                   <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-primary/20">
                     <Button
                       variant="outline"
@@ -222,19 +227,49 @@ export const Navigation = () => {
                         Discord
                       </a>
                     </Button>
+                    
                     {user ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="transition-all duration-300 w-full"
-                        onClick={() => {
-                          handleSignOut();
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sign Out
-                      </Button>
+                      <>
+                        <div className="border-t border-primary/20 my-2"></div>
+                        <div className="px-2 py-1">
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start w-full"
+                          onClick={() => {
+                            navigate("/dashboard");
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          Dashboard
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start w-full"
+                          onClick={() => {
+                            navigate("/my-characters");
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          My Characters
+                        </Button>
+                        <div className="border-t border-primary/20 my-2"></div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="transition-all duration-300 w-full text-destructive hover:bg-destructive/20"
+                          onClick={() => {
+                            handleSignOut();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </>
                     ) : (
                       <Button
                         variant="secondary"
@@ -248,6 +283,7 @@ export const Navigation = () => {
                         </Link>
                       </Button>
                     )}
+                    
                     <Button
                       size="sm"
                       className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300 w-full"

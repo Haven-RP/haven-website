@@ -66,11 +66,6 @@ const Members = () => {
         return () => subscription.unsubscribe();
     }, [navigate]);
 
-    const signOut = async () => {
-        await supabase.auth.signOut();
-        navigate("/");
-    };
-
     // Example role-checking function
     const hasRole = (roleName: string) => {
         return userRoles.includes(roleName);
@@ -95,18 +90,13 @@ const Members = () => {
                     <div className="max-w-4xl mx-auto space-y-8">
                         {/* Welcome Section */}
                         <div className="bg-card/90 backdrop-blur-sm border border-border rounded-lg p-8">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h1 className="text-3xl font-display font-bold mb-2">
-                                        Welcome, {user?.user_metadata?.full_name || "Member"}!
-                                    </h1>
-                                    <p className="text-muted-foreground">
-                                        {user?.email}
-                                    </p>
-                                </div>
-                                <Button onClick={signOut} variant="outline">
-                                    Sign Out
-                                </Button>
+                            <div className="mb-6">
+                                <h1 className="text-3xl font-display font-bold mb-2">
+                                    Welcome, {user?.user_metadata?.full_name || "Member"}!
+                                </h1>
+                                <p className="text-muted-foreground">
+                                    {user?.email}
+                                </p>
                             </div>
 
                             {/* User Roles */}
