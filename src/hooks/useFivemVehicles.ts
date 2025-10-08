@@ -10,9 +10,9 @@ export interface FivemVehicle {
   body: number;
   favourite: number;
   mileage: number;
-  brand: string;
-  model: string;
-  category: string;
+  brand: string | null;
+  model: string | null;
+  category: string | null;
   dealership: string | null;
 }
 

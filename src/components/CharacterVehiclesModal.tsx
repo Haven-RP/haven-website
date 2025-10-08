@@ -31,7 +31,9 @@ export const CharacterVehiclesModal = ({
   const [copiedPlates, setCopiedPlates] = useState<{ [key: string]: boolean }>({});
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getVehicleCategoryColor = (category: string) => {
+  const getVehicleCategoryColor = (category: string | null) => {
+    if (!category) return "bg-muted/20 text-muted-foreground border-muted/30";
+    
     const colors: { [key: string]: string } = {
       super: "bg-accent/20 text-accent border-accent/30",
       sports: "bg-primary/20 text-primary border-primary/30",
@@ -48,7 +50,9 @@ export const CharacterVehiclesModal = ({
     return colors[category.toLowerCase()] || "bg-muted/20 text-muted-foreground border-muted/30";
   };
 
-  const formatCategory = (category: string) => {
+  const formatCategory = (category: string | null) => {
+    if (!category) return "Unknown";
+    
     const formatted: { [key: string]: string } = {
       sportsclassics: "Sports Classics",
       offroad: "Off-Road",
@@ -213,7 +217,14 @@ export const CharacterVehiclesModal = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="text-xl font-heading font-bold text-foreground">
-                              {vehicle.brand} {vehicle.model}
+                              {vehicle.brand && vehicle.model 
+                                ? `${vehicle.brand} ${vehicle.model}`
+                                : vehicle.brand 
+                                  ? vehicle.brand
+                                  : vehicle.model 
+                                    ? vehicle.model
+                                    : "Unknown Vehicle"
+                              }
                             </h3>
                             {vehicle.favourite === 1 && (
                               <Star className="w-5 h-5 text-yellow-500 fill-yellow-500 flex-shrink-0" />
@@ -283,7 +294,13 @@ export const CharacterVehiclesModal = ({
                         onClick={() =>
                           setSelectedVehicle({
                             plate: vehicle.plate,
-                            name: `${vehicle.brand} ${vehicle.model}`,
+                            name: vehicle.brand && vehicle.model 
+                              ? `${vehicle.brand} ${vehicle.model}`
+                              : vehicle.brand 
+                                ? vehicle.brand
+                                : vehicle.model 
+                                  ? vehicle.model
+                                  : `Vehicle ${vehicle.plate}`,
                           })
                         }
                       >
