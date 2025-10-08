@@ -1,10 +1,11 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useFivemVehicles } from "@/hooks/useFivemVehicles";
-import { Loader2, Car, Fuel, Wrench, Heart, Star, Package, Copy, Check, Sparkles } from "lucide-react";
+import { Loader2, Car, Fuel, Wrench, Heart, Star, Package, Copy, Check, Sparkles, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { VehicleStorageModal } from "./VehicleStorageModal";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,6 +29,7 @@ export const CharacterVehiclesModal = ({
     name: string;
   } | null>(null);
   const [copiedPlates, setCopiedPlates] = useState<{ [key: string]: boolean }>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getVehicleCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -110,6 +112,44 @@ export const CharacterVehiclesModal = ({
     return null;
   };
 
+  const getDealershipType = (dealership: string | null): string => {
+    if (!dealership || dealership === 'null') return 'regular';
+    return dealership.toLowerCase();
+  };
+
+  // Filter vehicles based on search query
+  const filteredVehicles = useMemo(() => {
+    if (!vehiclesData?.vehicles || !searchQuery.trim()) {
+      return vehiclesData?.vehicles || [];
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    return vehiclesData.vehicles.filter(vehicle => {
+      // Search by category
+      if (vehicle.category.toLowerCase().includes(query)) return true;
+      
+      // Search by formatted category
+      if (formatCategory(vehicle.category).toLowerCase().includes(query)) return true;
+      
+      // Search by dealership type
+      const dealershipType = getDealershipType(vehicle.dealership);
+      if (dealershipType.includes(query)) return true;
+      if (dealershipType === '1of1' && ('1of1'.includes(query) || '1 of 1'.includes(query))) return true;
+      
+      // Search by brand/make
+      if (vehicle.brand.toLowerCase().includes(query)) return true;
+      
+      // Search by model
+      if (vehicle.model.toLowerCase().includes(query)) return true;
+      
+      // Search by plate
+      if (vehicle.plate.toLowerCase().includes(query)) return true;
+      
+      return false;
+    });
+  }, [vehiclesData?.vehicles, searchQuery]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,14 +174,36 @@ export const CharacterVehiclesModal = ({
               <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
             </div>
           ) : vehiclesData && vehiclesData.vehicles.length > 0 ? (
-            <ScrollArea className="h-[65vh] pr-4">
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Total Vehicles: {vehiclesData.vehicle_count}
-                </p>
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search by category, type, make, model, or plate..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-black/50 backdrop-blur-sm border-primary/30 focus:border-primary"
+                />
+              </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {vehiclesData.vehicles.map((vehicle, index) => (
+              <ScrollArea className="h-[58vh] pr-4">
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {filteredVehicles.length} of {vehiclesData.vehicle_count} vehicles
+                  </p>
+
+                  {filteredVehicles.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Car className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-lg text-muted-foreground mb-2">No vehicles found</p>
+                      <p className="text-sm text-muted-foreground">
+                        Try a different search term
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {filteredVehicles.map((vehicle, index) => (
                     <div
                       key={index}
                       className="bg-black/40 border border-white/10 rounded-lg p-5 hover:border-primary/30 transition-all duration-300"
@@ -229,10 +291,12 @@ export const CharacterVehiclesModal = ({
                         View Storage
                       </Button>
                     </div>
-                  ))}
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </ScrollArea>
+              </ScrollArea>
+            </div>
           ) : (
             <div className="text-center py-12">
               <Car className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
