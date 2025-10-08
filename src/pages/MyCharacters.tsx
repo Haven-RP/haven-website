@@ -120,7 +120,7 @@ const MyCharacters = () => {
       <div className="relative z-10">
         <Navigation />
 
-        <main className="container mx-auto px-4 pt-32 pb-20">
+        <main className="container mx-auto px-4 pt-40 pb-20">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
