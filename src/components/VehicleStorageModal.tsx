@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useFivemVehicleInventory } from "@/hooks/useFivemVehicleInventory";
-import { Loader2, Package, Box } from "lucide-react";
+import { Loader2, Package, Box, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useMemo } from "react";
 
 interface VehicleStorageModalProps {
   open: boolean;
@@ -23,6 +25,7 @@ export const VehicleStorageModal = ({
     open ? citizenid : null,
     open ? plate : null
   );
+  const [searchQuery, setSearchQuery] = useState("");
 
   const formatItemName = (name: string) => {
     return name
@@ -32,19 +35,47 @@ export const VehicleStorageModal = ({
       .join(" ");
   };
 
-  const renderInventorySection = (title: string, items: Array<{ name: string; amount: number }>, icon: typeof Package) => {
+  // Filter items based on search query
+  const filterItems = (items: Array<{ name: string; amount: number }>) => {
+    if (!searchQuery.trim()) return items;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return items.filter(item => {
+      const formattedName = formatItemName(item.name).toLowerCase();
+      return formattedName.includes(query) || item.name.toLowerCase().includes(query);
+    });
+  };
+
+  const filteredGlovebox = useMemo(() => 
+    storage ? filterItems(storage.glovebox) : [], 
+    [storage?.glovebox, searchQuery]
+  );
+
+  const filteredTrunk = useMemo(() => 
+    storage ? filterItems(storage.trunk) : [], 
+    [storage?.trunk, searchQuery]
+  );
+
+  const renderInventorySection = (
+    title: string, 
+    items: Array<{ name: string; amount: number }>, 
+    originalCount: number,
+    icon: typeof Package
+  ) => {
     const Icon = icon;
     
     return (
       <div className="mb-6">
         <h3 className="text-lg font-heading font-bold mb-3 flex items-center gap-2">
           <Icon className="w-5 h-5 text-primary" />
-          {title} ({items.length})
+          {title} ({items.length}{searchQuery && originalCount !== items.length ? ` of ${originalCount}` : ''})
         </h3>
         
         {items.length === 0 ? (
           <div className="bg-black/40 border border-white/10 rounded-lg p-8 text-center">
-            <p className="text-muted-foreground">Empty</p>
+            <p className="text-muted-foreground">
+              {searchQuery && originalCount > 0 ? 'No items match your search' : 'Empty'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -94,15 +125,29 @@ export const VehicleStorageModal = ({
             <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
           </div>
         ) : storage ? (
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6">
-              {/* Glovebox */}
-              {renderInventorySection("Glovebox", storage.glovebox, Package)}
-              
-              {/* Trunk */}
-              {renderInventorySection("Trunk", storage.trunk, Box)}
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search storage by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-black/50 backdrop-blur-sm border-primary/30 focus:border-primary"
+              />
             </div>
-          </ScrollArea>
+
+            <ScrollArea className="h-[53vh] pr-4">
+              <div className="space-y-6">
+                {/* Glovebox */}
+                {renderInventorySection("Glovebox", filteredGlovebox, storage.glovebox.length, Package)}
+                
+                {/* Trunk */}
+                {renderInventorySection("Trunk", filteredTrunk, storage.trunk.length, Box)}
+              </div>
+            </ScrollArea>
+          </div>
         ) : null}
       </DialogContent>
     </Dialog>

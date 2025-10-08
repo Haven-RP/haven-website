@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useFivemCharacter } from "@/hooks/useFivemCharacter";
-import { Loader2, Package, Wrench, Shield, DollarSign } from "lucide-react";
+import { Loader2, Package, Wrench, Shield, DollarSign, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useMemo } from "react";
 
 interface CharacterInventoryModalProps {
   open: boolean;
@@ -18,6 +20,7 @@ export const CharacterInventoryModal = ({
   characterName,
 }: CharacterInventoryModalProps) => {
   const { data: character, isLoading, error } = useFivemCharacter(open ? citizenid : null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const formatItemName = (name: string) => {
     return name
@@ -27,6 +30,20 @@ export const CharacterInventoryModal = ({
       .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
       .join(" ");
   };
+
+  // Filter inventory based on search query
+  const filteredInventory = useMemo(() => {
+    if (!character?.inventory || !searchQuery.trim()) {
+      return character?.inventory || [];
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    return character.inventory.filter(item => {
+      const formattedName = formatItemName(item.name).toLowerCase();
+      return formattedName.includes(query) || item.name.toLowerCase().includes(query);
+    });
+  }, [character?.inventory, searchQuery]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,10 +68,23 @@ export const CharacterInventoryModal = ({
             <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
           </div>
         ) : character ? (
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6">
-              {/* Character Stats Summary */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black/30 rounded-lg border border-white/10">
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search inventory by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-black/50 backdrop-blur-sm border-primary/30 focus:border-primary"
+              />
+            </div>
+
+            <ScrollArea className="h-[53vh] pr-4">
+              <div className="space-y-6">
+                {/* Character Stats Summary */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black/30 rounded-lg border border-white/10">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-accent" />
                   <div>
@@ -89,18 +119,22 @@ export const CharacterInventoryModal = ({
                 </div>
               </div>
 
-              {/* Inventory Items */}
-              <div>
-                <h3 className="text-lg font-heading font-bold mb-3 flex items-center gap-2">
-                  <Package className="w-5 h-5 text-primary" />
-                  Inventory Items ({character.inventory.length})
-                </h3>
-                
-                {character.inventory.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No items in inventory</p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {character.inventory.map((item, index) => (
+                {/* Inventory Items */}
+                <div>
+                  <h3 className="text-lg font-heading font-bold mb-3 flex items-center gap-2">
+                    <Package className="w-5 h-5 text-primary" />
+                    Inventory Items ({filteredInventory.length}{searchQuery ? ` of ${character.inventory.length}` : ''})
+                  </h3>
+                  
+                  {filteredInventory.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        {searchQuery ? 'No items match your search' : 'No items in inventory'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {filteredInventory.map((item, index) => (
                       <div
                         key={index}
                         className="bg-black/40 border border-white/10 rounded-lg p-4 hover:border-primary/30 transition-colors"
@@ -146,12 +180,13 @@ export const CharacterInventoryModal = ({
                           </div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </ScrollArea>
+            </ScrollArea>
+          </div>
         ) : null}
       </DialogContent>
     </Dialog>
