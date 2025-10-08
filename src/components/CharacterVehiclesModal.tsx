@@ -127,24 +127,24 @@ export const CharacterVehiclesModal = ({
     
     return vehiclesData.vehicles.filter(vehicle => {
       // Search by category
-      if (vehicle.category.toLowerCase().includes(query)) return true;
+      if (vehicle.category && vehicle.category.toLowerCase().includes(query)) return true;
       
       // Search by formatted category
-      if (formatCategory(vehicle.category).toLowerCase().includes(query)) return true;
+      if (vehicle.category && formatCategory(vehicle.category).toLowerCase().includes(query)) return true;
       
       // Search by dealership type
       const dealershipType = getDealershipType(vehicle.dealership);
-      if (dealershipType.includes(query)) return true;
+      if (dealershipType && dealershipType.includes(query)) return true;
       if (dealershipType === '1of1' && ('1of1'.includes(query) || '1 of 1'.includes(query))) return true;
       
       // Search by brand/make
-      if (vehicle.brand.toLowerCase().includes(query)) return true;
+      if (vehicle.brand && vehicle.brand.toLowerCase().includes(query)) return true;
       
       // Search by model
-      if (vehicle.model.toLowerCase().includes(query)) return true;
+      if (vehicle.model && vehicle.model.toLowerCase().includes(query)) return true;
       
       // Search by plate
-      if (vehicle.plate.toLowerCase().includes(query)) return true;
+      if (vehicle.plate && vehicle.plate.toLowerCase().includes(query)) return true;
       
       return false;
     });
