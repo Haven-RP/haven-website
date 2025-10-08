@@ -138,7 +138,7 @@ const Store = () => {
                   {webstoreError?.message || categoriesError?.message}
                 </p>
                 <p className="text-center text-xs text-muted-foreground mt-4">
-                  Please make sure VITE_TEBEX_PUBLIC_TOKEN is configured in your environment variables.
+                  Please make sure TEBEX_SECRET_KEY is configured in Vercel environment variables and the project has been redeployed.
                 </p>
               </CardContent>
             </Card>
