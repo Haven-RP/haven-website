@@ -236,7 +236,7 @@ const MyCharacters = () => {
                         <div className="flex items-center gap-2">
                           <Heart className="w-4 h-4 text-red-500" />
                           <span className="text-sm text-muted-foreground">
-                            HP: <span className="text-foreground font-semibold">{character.health}</span>
+                            HP: <span className="text-foreground font-semibold">{character.health} ({((character.health / 200) * 100).toFixed(0)}%)</span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2">

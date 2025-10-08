@@ -77,7 +77,7 @@ export const CharacterInventoryModal = ({
                   <Wrench className="w-5 h-5 text-secondary" />
                   <div>
                     <p className="text-xs text-muted-foreground">Health</p>
-                    <p className="text-sm font-semibold text-secondary">{character.health}</p>
+                    <p className="text-sm font-semibold text-secondary">{character.health} ({((character.health / 200) * 100).toFixed(0)}%)</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
