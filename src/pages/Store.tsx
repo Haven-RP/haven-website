@@ -22,8 +22,8 @@ const Store = () => {
   }
 
   const handlePurchase = (packageId: number, packageName: string) => {
-    // Open Tebex checkout in new window
-    const checkoutUrl = `https://${siteConfig.tebexWebstoreIdentifier}/package/${packageId}`;
+    // Open Tebex checkout in new window using custom domain
+    const checkoutUrl = `https://${siteConfig.tebexStorefrontUrl}/package/${packageId}`;
     window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -173,7 +173,7 @@ const Store = () => {
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Sparkles className="w-4 h-4 text-accent" />
                   <span>
-                    Visit our <a href={`https://${siteConfig.tebexWebstoreIdentifier}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">online store</a>
+                    Visit our <a href={`https://${siteConfig.tebexStorefrontUrl}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">online store</a>
                   </span>
                   <Badge variant="outline" className="ml-2">
                     {webstore.account.currency.symbol} {webstore.account.currency.iso}
