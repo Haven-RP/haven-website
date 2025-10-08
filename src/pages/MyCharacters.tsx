@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import pageBg from "@/assets/page-bg.png";
-import { Loader2, User as UserIcon, Phone, DollarSign, CreditCard, Coins, Package, Heart, Shield } from "lucide-react";
+import { Loader2, User as UserIcon, Phone, DollarSign, CreditCard, Coins, Package, Heart, Shield, Copy, Check } from "lucide-react";
 import { useFivemCharacters } from "@/hooks/useFivemCharacters";
 import { CharacterInventoryModal } from "@/components/CharacterInventoryModal";
+import { useToast } from "@/hooks/use-toast";
 
 const MyCharacters = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [discordUserId, setDiscordUserId] = useState<string | null>(null);
@@ -21,6 +23,7 @@ const MyCharacters = () => {
     citizenid: string;
     name: string;
   } | null>(null);
+  const [copiedItems, setCopiedItems] = useState<{ [key: string]: boolean }>({});
 
   // Fetch characters
   const { data: charactersData, isLoading: charactersLoading, error: charactersError } = useFivemCharacters(discordUserId);
@@ -39,6 +42,31 @@ const MyCharacters = () => {
     
     // Return original if not 10 digits
     return phone;
+  };
+
+  // Copy to clipboard with feedback
+  const copyToClipboard = async (text: string, label: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedItems({ ...copiedItems, [id]: true });
+      toast({
+        title: "Copied!",
+        description: `${label} copied to clipboard`,
+        duration: 2000,
+      });
+      
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedItems((prev) => ({ ...prev, [id]: false }));
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
   };
 
   useEffect(() => {
@@ -134,8 +162,17 @@ const MyCharacters = () => {
                       </CardTitle>
                       <CardDescription className="space-y-1">
                         <div className="flex items-center gap-2 text-sm">
-                          <Badge variant="outline" className="font-mono">
+                          <Badge 
+                            variant="outline" 
+                            className="font-mono cursor-pointer hover:bg-primary/10 transition-colors group relative"
+                            onClick={() => copyToClipboard(character.citizenid, "Citizen ID", `cid-${character.id}`)}
+                          >
                             {character.citizenid}
+                            {copiedItems[`cid-${character.id}`] ? (
+                              <Check className="w-3 h-3 ml-1.5 text-green-500" />
+                            ) : (
+                              <Copy className="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            )}
                           </Badge>
                         </div>
                       </CardDescription>
@@ -143,9 +180,19 @@ const MyCharacters = () => {
 
                     <CardContent className="space-y-4">
                       {/* Contact Info */}
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div 
+                        className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-secondary transition-colors group"
+                        onClick={() => character.charinfoData.phone && copyToClipboard(character.charinfoData.phone, "Phone number", `phone-${character.id}`)}
+                      >
                         <Phone className="w-4 h-4 text-secondary" />
-                        <span>{formatPhoneNumber(character.charinfoData.phone)}</span>
+                        <span className="group-hover:underline">{formatPhoneNumber(character.charinfoData.phone)}</span>
+                        {character.charinfoData.phone && (
+                          copiedItems[`phone-${character.id}`] ? (
+                            <Check className="w-3 h-3 text-green-500" />
+                          ) : (
+                            <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          )
+                        )}
                       </div>
 
                       {/* Money */}
