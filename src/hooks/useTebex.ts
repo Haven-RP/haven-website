@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-const TEBEX_BASE_URL = "https://plugin.tebex.io";
-const TEBEX_PUBLIC_TOKEN = import.meta.env.VITE_TEBEX_PUBLIC_TOKEN || "";
+// Use our Vercel API routes instead of calling Tebex directly (to avoid CORS issues)
+const API_BASE_URL = import.meta.env.PROD 
+  ? "/api/tebex" // Production: use relative path
+  : "http://localhost:8080/api/tebex"; // Development: adjust port if needed
 
 export interface TebexCategory {
   id: number;
@@ -71,23 +73,15 @@ export const useTebexWebstore = () => {
   return useQuery<TebexWebstore, Error>({
     queryKey: ["tebex-webstore"],
     queryFn: async () => {
-      if (!TEBEX_PUBLIC_TOKEN) {
-        throw new Error("Tebex public token not configured");
-      }
-
-      const response = await fetch(`${TEBEX_BASE_URL}/information`, {
-        headers: {
-          "X-Tebex-Public-Token": TEBEX_PUBLIC_TOKEN,
-        },
-      });
+      const response = await fetch(`${API_BASE_URL}/information`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch webstore info: ${response.status}`);
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(error.error || `Failed to fetch webstore info: ${response.status}`);
       }
 
       return response.json();
     },
-    enabled: !!TEBEX_PUBLIC_TOKEN,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
     retry: 2,
   });
@@ -98,23 +92,15 @@ export const useTebexCategories = () => {
   return useQuery<TebexCategory[], Error>({
     queryKey: ["tebex-categories"],
     queryFn: async () => {
-      if (!TEBEX_PUBLIC_TOKEN) {
-        throw new Error("Tebex public token not configured");
-      }
-
-      const response = await fetch(`${TEBEX_BASE_URL}/categories`, {
-        headers: {
-          "X-Tebex-Public-Token": TEBEX_PUBLIC_TOKEN,
-        },
-      });
+      const response = await fetch(`${API_BASE_URL}/categories`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch categories: ${response.status}`);
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(error.error || `Failed to fetch categories: ${response.status}`);
       }
 
       return response.json();
     },
-    enabled: !!TEBEX_PUBLIC_TOKEN,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 2,
   });
@@ -129,23 +115,16 @@ export const useTebexCategoryPackages = (categoryId: number | null) => {
         throw new Error("No category ID provided");
       }
 
-      if (!TEBEX_PUBLIC_TOKEN) {
-        throw new Error("Tebex public token not configured");
-      }
-
-      const response = await fetch(`${TEBEX_BASE_URL}/categories/${categoryId}`, {
-        headers: {
-          "X-Tebex-Public-Token": TEBEX_PUBLIC_TOKEN,
-        },
-      });
+      const response = await fetch(`${API_BASE_URL}/category/${categoryId}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch category packages: ${response.status}`);
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(error.error || `Failed to fetch category packages: ${response.status}`);
       }
 
       return response.json();
     },
-    enabled: !!categoryId && !!TEBEX_PUBLIC_TOKEN,
+    enabled: !!categoryId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 2,
   });
@@ -160,23 +139,16 @@ export const useTebexPackage = (packageId: number | null) => {
         throw new Error("No package ID provided");
       }
 
-      if (!TEBEX_PUBLIC_TOKEN) {
-        throw new Error("Tebex public token not configured");
-      }
-
-      const response = await fetch(`${TEBEX_BASE_URL}/packages/${packageId}`, {
-        headers: {
-          "X-Tebex-Public-Token": TEBEX_PUBLIC_TOKEN,
-        },
-      });
+      const response = await fetch(`${API_BASE_URL}/package/${packageId}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch package: ${response.status}`);
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(error.error || `Failed to fetch package: ${response.status}`);
       }
 
       return response.json();
     },
-    enabled: !!packageId && !!TEBEX_PUBLIC_TOKEN,
+    enabled: !!packageId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 2,
   });

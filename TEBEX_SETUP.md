@@ -16,11 +16,22 @@ This guide will help you configure the HavenRP store with Tebex Headless API.
 
 ## Step 2: Configure Environment Variables
 
+### Local Development
 Add to your `.env.local` file:
 
 ```env
 VITE_TEBEX_PUBLIC_TOKEN=your-tebex-public-token-here
 ```
+
+### Vercel Deployment
+Add the environment variable in Vercel:
+
+1. Go to your project in Vercel dashboard
+2. Navigate to **Settings** → **Environment Variables**
+3. Add `VITE_TEBEX_PUBLIC_TOKEN` with your token
+4. Select all environments (Production, Preview, Development)
+5. Click **Save**
+6. Redeploy your project
 
 ## Step 3: Update Site Configuration
 
@@ -58,10 +69,28 @@ addvehicle {player} adder
 givemoney {player} 1000000
 ```
 
+## Architecture
+
+### Backend Proxy (Vercel Serverless Functions)
+To avoid CORS issues, Tebex API calls are proxied through Vercel serverless functions:
+
+- `api/tebex/information.ts` - Webstore details
+- `api/tebex/categories.ts` - All categories  
+- `api/tebex/category/[id].ts` - Packages in category
+- `api/tebex/package/[id].ts` - Single package details
+
+### Frontend (`src/hooks/useTebex.ts`)
+React hooks call the backend API routes instead of Tebex directly:
+
+- `useTebexWebstore()` - Fetches store information
+- `useTebexCategories()` - Gets all categories
+- `useTebexCategoryPackages(id)` - Fetches packages for category
+- `useTebexPackage(id)` - Gets single package
+
 ## Features Included
 
 ### ✅ What Works
-- ✅ Fetches all categories from Tebex
+- ✅ Fetches all categories from Tebex via serverless functions
 - ✅ Displays packages with images, descriptions, prices
 - ✅ Shows sale/discount badges
 - ✅ Tabbed navigation between categories
@@ -70,12 +99,19 @@ givemoney {player} 1000000
 - ✅ Currency display from your Tebex account
 - ✅ Loading states and error handling
 - ✅ Disabled packages shown but not purchasable
+- ✅ CORS-free (requests go through backend)
+- ✅ Response caching (5-10 minutes)
 
-### 📦 API Endpoints Used
-- `GET /information` - Webstore details
-- `GET /categories` - All categories
-- `GET /categories/{id}` - Packages in category
-- `GET /packages/{id}` - Single package details
+### 📦 API Flow
+```
+Frontend → Vercel API Routes → Tebex API → Response
+```
+
+This architecture ensures:
+- No CORS issues
+- Secure token storage (server-side only)
+- Response caching
+- Better error handling
 
 ## Checkout Flow
 
@@ -152,10 +188,12 @@ Navigate to: `http://localhost:8080/store`
 ## Security Notes
 
 ⚠️ **Important:**
-- **Public Token** is safe for client-side use
+- **Public Token** is stored server-side in Vercel
 - **Never** commit `.env.local` to git
-- **Never** use Secret Key on frontend
+- **Never** use Secret Key anywhere
 - Public Token can only **read** data, not modify
+- All API calls are proxied through secure backend
+- Frontend never directly contacts Tebex API
 
 ## Support
 
