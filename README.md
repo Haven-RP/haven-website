@@ -14,6 +14,7 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
 - **About** - Server story, values, and feature highlights
 - **Staff** - Team showcase with roles, bios, and avatars
 - **Join/Apply** - Server requirements and joining instructions
+- **Store** - Tebex integration with packages, categories, and checkout
 - **Wiki** - Embedded Notion documentation
 
 ### Authenticated Features
@@ -77,6 +78,8 @@ VITE_SUPABASE_KEY=your-supabase-anon-key
 # HavenRP API
 VITE_DISCORD_ROLES_API_URL=https://api.haven-rp.com/api/discord/roles
 VITE_HAVEN_API_KEY=your-havenrp-api-key
+
+# No Tebex environment variables needed - configure in src/config/site.ts
 ```
 
 ### Supabase Setup
@@ -86,6 +89,15 @@ VITE_HAVEN_API_KEY=your-havenrp-api-key
 3. Add your Discord app credentials
 4. Set redirect URL to `https://yourdomain.com/`
 5. Add `VITE_HAVEN_API_KEY` to Supabase Secrets
+
+### Tebex Setup
+
+1. Find your webstore URL (e.g., `havenrp.tebex.io`)
+2. Update `tebexWebstoreIdentifier` in `src/config/site.ts`
+
+ℹ️ **Note:** No API keys needed - the store API is public and called directly from the browser.
+
+See [TEBEX_SETUP.md](./TEBEX_SETUP.md) for detailed instructions.
 
 ## 📁 Project Structure
 
@@ -102,6 +114,7 @@ haven-website/
 │   │   ├── Index.tsx       # Homepage
 │   │   ├── Dashboard.tsx   # Member dashboard
 │   │   ├── MyCharacters.tsx # FiveM characters
+│   │   ├── Store.tsx       # Tebex store
 │   │   └── ...
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useDiscordRoles.ts
@@ -111,6 +124,7 @@ haven-website/
 │   │   ├── useFivemVehicleInventory.ts
 │   │   ├── useFivemStats.ts
 │   │   ├── useDiscordStats.ts
+│   │   ├── useTebex.ts     # Tebex API integration
 │   │   └── ...
 │   ├── config/             # Site configuration
 │   │   └── site.ts         # Centralized config
@@ -186,6 +200,15 @@ GET https://servers-frontend.fivem.net/api/servers/single/{serverCode}
 ```
 GET https://discord.com/api/guilds/{guildId}/widget.json
 ```
+
+### Tebex Public Store API
+```
+GET https://{identifier}.tebex.io/api/information
+GET https://{identifier}.tebex.io/api/categories
+GET https://{identifier}.tebex.io/api/packages/{id}
+```
+
+**Note:** API calls are made directly from the browser (no proxy needed)
 
 ## 📜 Available Scripts
 

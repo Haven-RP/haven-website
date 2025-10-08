@@ -11,6 +11,7 @@ import Staff from "./pages/Staff";
 import Dashboard from "./pages/Dashboard";
 import Wiki from "./pages/Wiki";
 import MyCharacters from "./pages/MyCharacters";
+import Store from "./pages/Store";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/staff" element={<Staff />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-characters" element={<MyCharacters />} />
+          <Route path="/store" element={<Store />} />
           <Route path="/wiki" element={<Wiki />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
