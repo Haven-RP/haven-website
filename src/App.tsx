@@ -9,6 +9,8 @@ import Apply from "./pages/Apply";
 import About from "./pages/About";
 import Staff from "./pages/Staff";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+import Wiki from "./pages/Wiki";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/staff" element={<Staff />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/wiki" element={<Wiki />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
