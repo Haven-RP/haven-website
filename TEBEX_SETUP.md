@@ -1,180 +1,236 @@
 # Tebex Headless API Setup Guide
 
-This guide will help you configure the HavenRP store with Tebex Headless API.
+This guide will walk you through integrating the [Tebex Headless API](https://docs.tebex.io/developers/headless-api/overview) into your HavenRP website.
+
+## What is the Headless API?
+
+The Tebex Headless API allows you to integrate your store directly into your own frontend. The API is **public** and can be called directly from the browser—no backend proxy or authentication required!
 
 ## Prerequisites
 
 1. A Tebex account with a configured webstore
 2. Products and categories set up in your Tebex dashboard
+3. Your webstore token
 
-## Step 1: Update Site Configuration
+## Step 1: Get Your Webstore Token
 
-In `src/config/site.ts`, update the Tebex webstore identifier:
+Your webstore token is a unique identifier for your Tebex store.
+
+### Finding Your Token:
+
+1. Go to [Tebex Creator Dashboard](https://creator.tebex.io/)
+2. Select your webstore
+3. The token is in your webstore URL or settings
+4. Format: `t66x-xxxxxxxxxxxxx` (starts with a short code, followed by a long alphanumeric string)
+
+**Example:** `t66x-7cd928b1e9312709e6810edac6dc1fd1eefc57cb`
+
+⚠️ **Note:** This token is **public** and safe to use in frontend code. It only allows read-only access to your public store data.
+
+## Step 2: Configure the Token
+
+Update `src/config/site.ts`:
 
 ```typescript
 // Tebex Store
-tebexWebstoreIdentifier: "your-store.tebex.io",
+tebexWebstoreToken: "t66x-YOUR_TOKEN_HERE", // Your Tebex webstore token
+tebexStorefrontUrl: "store.haven-rp.com", // Custom domain for checkout
 ```
 
-Replace `havenrp.tebex.io` with your actual Tebex webstore URL.
+- **`tebexWebstoreToken`**: Your Headless API token (public, read-only)
+- **`tebexStorefrontUrl`**: Your custom domain or `yourstore.tebex.io`
 
-**That's it!** No environment variables needed - the store API is public and called directly from the browser.
+**That's it!** No environment variables, no secrets, no backend configuration needed.
 
-## Step 4: Configure Your Tebex Store
+## Step 3: Configure Your Tebex Store
 
 ### Categories
+
 1. Go to your Tebex dashboard
 2. Navigate to **Webstore** → **Categories**
 3. Create categories (e.g., "VIP Packages", "Vehicles", "Currency")
-4. Set the order for how they appear
+4. Set the display order
 
 ### Packages
+
 1. Navigate to **Webstore** → **Packages**
 2. Create packages with:
    - **Name**: Display name
    - **Price**: Set in your currency
    - **Description**: HTML supported
-   - **Image**: Optional, but recommended (use CDN URLs)
+   - **Image**: Optional, recommended (400x200px or larger)
    - **Category**: Assign to a category
-   - **Commands**: FiveM commands to execute on purchase
+   - **Type**: Single or Subscription
 
-### Example FiveM Commands
-```
-give {player} vip_30days
-addvehicle {player} adder
-givemoney {player} 1000000
-```
+### Example Package Setup
+
+- **VIP Bronze** - $4.99/month subscription
+- **VIP Silver** - $9.99/month subscription
+- **VIP Gold** - $19.99/month subscription
+- **Vehicle Pack** - $9.99 one-time purchase
+- **Currency Pack** - $4.99 one-time purchase
 
 ## Architecture
 
-### Frontend Direct API Calls
+### Direct Browser API Calls
 
-The frontend (`src/hooks/useTebex.ts`) calls the Tebex store API directly:
+The frontend (`src/hooks/useTebex.ts`) calls the Tebex Headless API directly:
 
-- `useTebexWebstore()` - Fetches `https://{store}.tebex.io/api/information`
-- `useTebexCategories()` - Fetches `https://{store}.tebex.io/api/categories`
-- `useTebexCategoryPackages(id)` - Fetches `https://{store}.tebex.io/api/categories/{id}`
-- `useTebexPackage(id)` - Fetches `https://{store}.tebex.io/api/packages/{id}`
+- `GET https://headless.tebex.io/api/accounts/{token}/categories?includePackages=1`
+- `GET https://headless.tebex.io/api/accounts/{token}/categories/{id}`
+- `GET https://headless.tebex.io/api/accounts/{token}/packages/{id}`
+
+### API Flow
+
+```
+Frontend (React) → Headless API → Response
+                 (headless.tebex.io)
+```
+
+**Benefits:**
+- ✅ No backend proxy needed
+- ✅ No CORS issues (API supports CORS)
+- ✅ No secrets or authentication
+- ✅ Public API is safe and read-only
+- ✅ Browser-side caching via TanStack Query
+- ✅ Fast and simple
 
 ## Features Included
 
 ### ✅ What Works
-- ✅ Fetches all categories and packages from Tebex public API
+
+- ✅ Fetches all categories and packages from Tebex
 - ✅ Displays packages with images, descriptions, prices
-- ✅ Shows sale/discount badges
+- ✅ Shows discount badges
 - ✅ Tabbed navigation between categories
 - ✅ Responsive design matching HavenRP theme
-- ✅ Direct checkout links to Tebex
-- ✅ Currency display from your Tebex account
+- ✅ Direct checkout links to your custom domain
+- ✅ Currency display from package data
 - ✅ Loading states and error handling
-- ✅ Disabled packages shown but not purchasable
-- ✅ Browser-side caching (5-10 minutes)
+- ✅ Subscription badges
+- ✅ Client-side caching (5-10 minutes)
 
-### 📦 API Flow
-```
-Frontend → Tebex Store Public API → Response
-```
+### Package Display
 
-This architecture:
-- No backend needed - direct browser calls
-- Cloudflare allows legitimate browser requests
-- Public API is safe and read-only
-- TanStack Query handles caching
+Each package card shows:
+- Image (if provided)
+- Name and description (HTML supported)
+- Original price (if discounted)
+- Final price with currency
+- Discount badge (if applicable)
+- Subscription badge (if applicable)
+- Purchase button
 
 ## Checkout Flow
 
 When a user clicks "Purchase":
-1. Opens Tebex checkout in new window
-2. User completes payment on Tebex
-3. Tebex executes configured commands on your FiveM server
-4. User receives items/perks automatically
 
-## Customization
+1. Opens checkout at `https://store.haven-rp.com/package/{id}` (or your domain)
+2. User completes payment on Tebex's secure checkout
+3. Commands are executed on your FiveM server automatically (if configured)
 
-### Styling
-The store inherits the HavenRP neon theme:
-- Primary color: Neon Cyan
-- Secondary: Electric Magenta
-- Cards use glassmorphism
-- Hover effects with neon glow
+## Local Development
 
-### Package Cards
-Edit `src/pages/Store.tsx` → `renderPackage()` function to customize:
-- Card layout
-- Information displayed
-- Button behavior
-- Image handling
+To run locally:
 
-### Add Custom Badges
-For special package types, add badges in the `renderPackage` function:
+1. Update `tebexWebstoreToken` in `src/config/site.ts`
+2. Start the development server:
 
-```typescript
-{pkg.type === "special" && (
-  <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500">
-    <Sparkles className="w-3 h-3 mr-1" />
-    Limited Edition
-  </Badge>
-)}
-```
-
-## Troubleshooting
-
-### "Error loading store" or 403 errors
-- Check if `TEBEX_SECRET_KEY` is set correctly in Vercel
-- Verify you're using the **Secret Key** (starts with `sk-`), not Public Token
-- Make sure you redeployed after adding the environment variable
-- Check Vercel function logs for detailed error messages
-
-### Packages not showing
-- Ensure packages are assigned to categories
-- Check that categories have `only_subcategories: false`
-- Verify packages are not disabled in Tebex dashboard
-
-### Images not loading
-- Use HTTPS URLs for images
-- Host images on a CDN (Imgur, Cloudinary, etc.)
-- Check CORS settings if using custom domain
-
-### Checkout not working
-- Verify `tebexWebstoreIdentifier` is correct in `site.ts`
-- Ensure your Tebex webstore is published (not in draft mode)
-- Check popup blockers
-
-## Testing
-
-### Test Mode
-To test without real purchases:
-1. In Tebex dashboard, enable **Test Mode**
-2. Use test card: `4242 4242 4242 4242`
-3. Any expiry date in future, any CVC
-
-### Development
 ```bash
 npm run dev
 ```
-Navigate to: `http://localhost:8080/store`
+
+3. Navigate to: `http://localhost:8080/store`
 
 ## Security Notes
 
-ℹ️ **Note:**
-- **Webstore URL** is public and safe
-- Store API only provides read access to public store data
+✅ **Public & Safe:**
+- Webstore token is **public** and safe to use in frontend code
+- Headless API only provides **read-only** access to public store data
 - No API keys or secrets needed
-- All calls are made directly from the browser
-- Users can't modify store data, only view and checkout
+- Users can only view packages and checkout—they cannot modify your store
+
+## Troubleshooting
+
+### "Failed to fetch" or Network Errors
+
+- Verify your webstore token is correct in `src/config/site.ts`
+- Check your browser console for specific error messages
+- Ensure your Tebex store is active and published
+
+### Store loads but shows no packages
+
+- Verify packages are published in your Tebex dashboard
+- Check packages are assigned to categories
+- Ensure categories are visible/active
+- Try adding `?includePackages=1` to the API URL in browser to test
+
+### Custom Domain Not Working
+
+- Verify your custom domain is configured in Tebex dashboard
+- Use the original `yourstore.tebex.io` format if custom domain isn't set up
+- Custom domain is only for checkout—API always uses `headless.tebex.io`
+
+### Currency Not Displaying Correctly
+
+- Ensure at least one package exists in your store
+- Check browser console for API response data
+- Currency is derived from package data
+
+## API Reference
+
+### Get Categories with Packages
+
+```
+GET https://headless.tebex.io/api/accounts/{token}/categories?includePackages=1
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": 123,
+      "name": "VIP Packages",
+      "description": "...",
+      "packages": [
+        {
+          "id": 456,
+          "name": "VIP Gold",
+          "description": "<p>...</p>",
+          "image": "https://...",
+          "type": "subscription",
+          "base_price": 19.99,
+          "total_price": 19.99,
+          "currency": "USD",
+          "discount": 0
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Get Single Category
+
+```
+GET https://headless.tebex.io/api/accounts/{token}/categories/{id}
+```
+
+### Get Single Package
+
+```
+GET https://headless.tebex.io/api/accounts/{token}/packages/{id}
+```
 
 ## Support
 
 For Tebex API issues:
+- [Tebex Headless API Documentation](https://docs.tebex.io/developers/headless-api/overview)
 - [Tebex Documentation](https://docs.tebex.io/)
-- [Tebex Support](https://tebex.io/contact)
+- [Tebex Support](https://www.tebex.io/contact/support)
 
-For HavenRP integration issues:
+For integration issues:
 - Check browser console for errors
-- Review `src/hooks/useTebex.ts` for API calls
-- Contact development team
-
----
-
-**Built with ❤️ for HavenRP Community**
-
+- Verify token is correct
+- Test API endpoints directly in browser

@@ -20,11 +20,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Get Tebex Secret Key from environment
+  const secretKey = process.env.TEBEX_SECRET_KEY;
+
+  if (!secretKey) {
+    console.error('TEBEX_SECRET_KEY not configured');
+    return res.status(500).json({ 
+      error: 'Tebex secret key not configured. Please set TEBEX_SECRET_KEY in Vercel environment variables and redeploy.' 
+    });
+  }
+
   try {
     // Fetch webstore info from Tebex Headless API
     const response = await fetch(`${TEBEX_API_BASE}/webstore/${PROJECT_ID}`, {
       headers: {
         'Accept': 'application/json',
+        'X-Tebex-Secret': secretKey,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
     });

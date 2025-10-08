@@ -1,59 +1,47 @@
 import { useQuery } from "@tanstack/react-query";
 import { siteConfig } from "@/config/site";
 
-// Use Vercel API proxy to bypass CORS
-const API_BASE_URL = import.meta.env.PROD 
-  ? "/api/tebex" // Production: use relative path
-  : "http://localhost:8080/api/tebex"; // Development: adjust port if needed
+// Tebex Headless API - can be called directly from browser (no auth needed)
+// Documentation: https://docs.tebex.io/developers/headless-api/overview
+const HEADLESS_API_BASE = "https://headless.tebex.io/api";
+const WEBSTORE_TOKEN = siteConfig.tebexWebstoreToken;
 
-export interface TebexCategory {
-  id: number;
-  order: number;
-  name: string;
-  only_subcategories: boolean;
-  subcategories: number[];
-  packages: number[];
-}
-
+// Headless API Response Types - https://docs.tebex.io/developers/headless-api/overview
 export interface TebexPackage {
   id: number;
   name: string;
+  description: string;
   image: string | null;
-  price: number;
-  expiry_length: number | null;
-  expiry_period: string | null;
-  type: string;
+  type: "single" | "subscription";
   category: {
     id: number;
     name: string;
   };
-  global_limit: number | null;
-  global_limit_period: string | null;
-  user_limit: number | null;
-  user_limit_period: string | null;
-  servers: any[];
-  description: string;
-  gui_item: string | null;
-  disabled: boolean;
+  base_price: number;
+  sales_tax: number;
+  total_price: number;
+  currency: string;
+  discount: number;
   disable_quantity: boolean;
-  custom_price: boolean;
-  choose_server: boolean;
-  limit_expires: boolean;
-  inherit_commands: boolean;
-  variable_giftcard: boolean;
-  required_packages: number[];
-  require_any: boolean;
-  create_giftcard: boolean;
-  show_until: string | null;
-  custom_username: boolean;
-  sale: {
-    active: boolean;
-    discount: number;
-  } | null;
+  disable_gifting: boolean;
+  expiration_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TebexCategory {
+  id: number;
+  name: string;
+  slug: string;
+  parent: Record<string, any>;
+  description: string;
+  packages: TebexPackage[];
+  order: number;
+  display_type: string;
 }
 
 export interface TebexWebstore {
-  id: number;
+  ident: string;
   account: {
     id: number;
     domain: string;
@@ -62,45 +50,59 @@ export interface TebexWebstore {
       iso: string;
       symbol: string;
     };
-    online_mode: boolean;
-    game_type: string;
-    log_events: boolean;
-    timezone: string;
   };
+  webstore_url: string;
 }
 
-// Fetch webstore information
+// Fetch webstore information (derived from categories call)
 export const useTebexWebstore = () => {
   return useQuery<TebexWebstore, Error>({
     queryKey: ["tebex-webstore"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/information`);
+      // The Headless API doesn't have a dedicated webstore info endpoint
+      // We'll derive currency info from the categories response
+      const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/categories?includePackages=1`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch webstore info: ${response.status}`);
+        throw new Error(`Failed to fetch webstore info: ${response.status}`);
       }
 
-      return response.json();
+      const result = await response.json();
+      const firstPackage = result.data?.[0]?.packages?.[0];
+      
+      // Build a minimal webstore object from available data
+      return {
+        ident: WEBSTORE_TOKEN,
+        account: {
+          id: 0,
+          domain: siteConfig.tebexStorefrontUrl,
+          name: siteConfig.serverName,
+          currency: {
+            iso: firstPackage?.currency || 'USD',
+            symbol: '$', // Default, will be replaced by actual package data
+          },
+        },
+        webstore_url: `https://${siteConfig.tebexStorefrontUrl}`,
+      };
     },
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
     retry: 2,
   });
 };
 
-// Fetch all categories
+// Fetch all categories with packages
 export const useTebexCategories = () => {
   return useQuery<TebexCategory[], Error>({
     queryKey: ["tebex-categories"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/categories`);
+      const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/categories?includePackages=1`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch categories: ${response.status}`);
+        throw new Error(`Failed to fetch categories: ${response.status}`);
       }
 
-      return response.json();
+      const result = await response.json();
+      return result.data; // Headless API returns { data: [...] }
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 2,
@@ -109,21 +111,21 @@ export const useTebexCategories = () => {
 
 // Fetch packages for a specific category
 export const useTebexCategoryPackages = (categoryId: number | null) => {
-  return useQuery<{ packages: TebexPackage[] }, Error>({
+  return useQuery<TebexCategory, Error>({
     queryKey: ["tebex-category-packages", categoryId],
     queryFn: async () => {
       if (!categoryId) {
         throw new Error("No category ID provided");
       }
 
-      const response = await fetch(`${API_BASE_URL}/category/${categoryId}`);
+      const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/categories/${categoryId}`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch category packages: ${response.status}`);
+        throw new Error(`Failed to fetch category packages: ${response.status}`);
       }
 
-      return response.json();
+      const result = await response.json();
+      return result.data; // Headless API returns { data: { ...category } }
     },
     enabled: !!categoryId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -140,14 +142,14 @@ export const useTebexPackage = (packageId: number | null) => {
         throw new Error("No package ID provided");
       }
 
-      const response = await fetch(`${API_BASE_URL}/package/${packageId}`);
+      const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/packages/${packageId}`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch package: ${response.status}`);
+        throw new Error(`Failed to fetch package: ${response.status}`);
       }
 
-      return response.json();
+      const result = await response.json();
+      return result.data; // Headless API returns { data: { ...package } }
     },
     enabled: !!packageId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes

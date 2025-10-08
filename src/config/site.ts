@@ -39,7 +39,7 @@ export const siteConfig = {
   twitter: "",
   
   // Tebex Store
-  tebexProjectId: "1620133", // Your Tebex project/webstore ID
+  tebexWebstoreToken: "YOUR_WEBSTORE_TOKEN_HERE", // Your Tebex webstore token (e.g., t66x-abc123...)
   tebexStorefrontUrl: "store.haven-rp.com", // Custom domain for checkout links
   
   // Meta

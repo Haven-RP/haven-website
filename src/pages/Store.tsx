@@ -7,18 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ShoppingCart, Tag, ExternalLink, Sparkles } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
-import { useTebexWebstore, useTebexCategories, useTebexCategoryPackages } from "@/hooks/useTebex";
+import { useTebexWebstore, useTebexCategories, type TebexPackage } from "@/hooks/useTebex";
 import { siteConfig } from "@/config/site";
 
 const Store = () => {
   const { data: webstore, isLoading: webstoreLoading, error: webstoreError } = useTebexWebstore();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useTebexCategories();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const { data: categoryPackages, isLoading: packagesLoading } = useTebexCategoryPackages(selectedCategory);
 
   // Set first category as default when categories load
   if (categories && categories.length > 0 && selectedCategory === null) {
-    setSelectedCategory(categories[0].id);
+    const firstCategoryWithPackages = categories.find(cat => cat.packages.length > 0);
+    if (firstCategoryWithPackages) {
+      setSelectedCategory(firstCategoryWithPackages.id);
+    }
   }
 
   const handlePurchase = (packageId: number, packageName: string) => {
@@ -34,9 +36,8 @@ const Store = () => {
     }).format(price);
   };
 
-  const renderPackage = (pkg: any) => {
-    const hasDiscount = pkg.sale?.active;
-    const discountedPrice = hasDiscount ? pkg.price * (1 - pkg.sale.discount / 100) : pkg.price;
+  const renderPackage = (pkg: TebexPackage) => {
+    const hasDiscount = pkg.discount > 0;
     
     return (
       <Card
@@ -47,7 +48,7 @@ const Store = () => {
           {hasDiscount && (
             <Badge className="w-fit bg-gradient-to-r from-accent to-secondary mb-2">
               <Tag className="w-3 h-3 mr-1" />
-              {pkg.sale.discount}% OFF
+              {pkg.discount}% OFF
             </Badge>
           )}
           {pkg.image && (
@@ -65,7 +66,10 @@ const Store = () => {
           <CardTitle className="text-xl text-foreground">{pkg.name}</CardTitle>
           <CardDescription className="text-sm">
             {pkg.description ? (
-              <div dangerouslySetInnerHTML={{ __html: pkg.description }} />
+              <div 
+                dangerouslySetInnerHTML={{ __html: pkg.description }} 
+                className="prose prose-sm prose-invert max-w-none"
+              />
             ) : (
               <span className="text-muted-foreground">No description available</span>
             )}
@@ -74,14 +78,14 @@ const Store = () => {
 
         <CardContent className="flex-grow">
           <div className="space-y-2">
-            {pkg.expiry_length && (
-              <div className="text-sm text-muted-foreground">
-                Duration: {pkg.expiry_length} {pkg.expiry_period}
-              </div>
+            {pkg.type === 'subscription' && (
+              <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/50">
+                Subscription
+              </Badge>
             )}
-            {pkg.user_limit && (
-              <div className="text-sm text-muted-foreground">
-                Limit: {pkg.user_limit} per user {pkg.user_limit_period && `per ${pkg.user_limit_period}`}
+            {pkg.expiration_date && (
+              <div className="text-xs text-muted-foreground">
+                Expires: {new Date(pkg.expiration_date).toLocaleDateString()}
               </div>
             )}
           </div>
@@ -91,20 +95,20 @@ const Store = () => {
           <div className="flex flex-col">
             {hasDiscount && (
               <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(pkg.price, webstore?.account.currency.iso)}
+                {formatPrice(pkg.base_price, pkg.currency)}
               </span>
             )}
             <span className={`font-bold ${hasDiscount ? 'text-accent text-2xl' : 'text-primary text-xl'}`}>
-              {formatPrice(discountedPrice, webstore?.account.currency.iso)}
+              {formatPrice(pkg.total_price, pkg.currency)}
             </span>
           </div>
           <Button
             className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
             onClick={() => handlePurchase(pkg.id, pkg.name)}
-            disabled={pkg.disabled}
+            disabled={pkg.disable_quantity}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
-            {pkg.disabled ? 'Unavailable' : 'Purchase'}
+            {pkg.disable_quantity ? 'Unavailable' : 'Purchase'}
           </Button>
         </CardFooter>
       </Card>
@@ -192,7 +196,7 @@ const Store = () => {
                 <div className="flex justify-center mb-8">
                   <TabsList className="bg-card/90 backdrop-blur-sm border border-primary/30 p-1">
                     {categories
-                      .filter((cat) => !cat.only_subcategories && cat.packages.length > 0)
+                      .filter((cat) => cat.packages.length > 0)
                       .map((category) => (
                         <TabsTrigger
                           key={category.id}
@@ -206,17 +210,12 @@ const Store = () => {
                 </div>
 
                 {categories
-                  .filter((cat) => !cat.only_subcategories && cat.packages.length > 0)
+                  .filter((cat) => cat.packages.length > 0)
                   .map((category) => (
                     <TabsContent key={category.id} value={category.id.toString()} className="mt-0">
-                      {packagesLoading ? (
-                        <div className="flex items-center justify-center py-20">
-                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                          <span className="ml-3 text-muted-foreground">Loading packages...</span>
-                        </div>
-                      ) : categoryPackages?.packages && categoryPackages.packages.length > 0 ? (
+                      {category.packages.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {categoryPackages.packages.map((pkg) => renderPackage(pkg))}
+                          {category.packages.map((pkg) => renderPackage(pkg))}
                         </div>
                       ) : (
                         <Card className="bg-card/90 backdrop-blur-sm border-primary/30">
@@ -245,7 +244,7 @@ const Store = () => {
                 asChild
               >
                 <a
-                  href={`https://${siteConfig.tebexWebstoreIdentifier}`}
+                  href={`https://${siteConfig.tebexStorefrontUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
