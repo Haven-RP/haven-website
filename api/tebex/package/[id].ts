@@ -1,7 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Use Headless API for web storefronts  
-const TEBEX_BASE_URL = "https://headless.tebex.io/api";
+// Tebex Headless API
+const TEBEX_API_BASE = "https://plugin.tebex.io";
+const PROJECT_ID = "1620133"; // HavenRP Tebex project ID
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers for all responses
@@ -25,22 +26,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Package ID is required' });
   }
 
-  // Use Secret Key (not Public Token) for Headless API
-  const secretKey = process.env.TEBEX_SECRET_KEY || process.env.VITE_TEBEX_SECRET_KEY;
-
-  if (!secretKey) {
-    return res.status(500).json({ 
-      error: 'Tebex secret key not configured. Please set TEBEX_SECRET_KEY in Vercel environment variables.' 
-    });
-  }
-
   try {
-    // Fetch package details directly from the store URL
-    const response = await fetch(`https://${secretKey}.tebex.io/api/packages/${id}`, {
+    // Fetch package details from Tebex Headless API
+    const response = await fetch(`${TEBEX_API_BASE}/packages/${id}?webstoreId=${PROJECT_ID}`, {
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': `https://${secretKey}.tebex.io`,
       },
     });
 
@@ -63,4 +54,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 }
-
