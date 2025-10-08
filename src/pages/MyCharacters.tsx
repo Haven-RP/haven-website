@@ -25,6 +25,22 @@ const MyCharacters = () => {
   // Fetch characters
   const { data: charactersData, isLoading: charactersLoading, error: charactersError } = useFivemCharacters(discordUserId);
 
+  // Format phone number as (XXX) XXX-XXXX
+  const formatPhoneNumber = (phone: string | null | undefined): string => {
+    if (!phone) return "No phone";
+    
+    // Remove all non-numeric characters
+    const cleaned = phone.replace(/\D/g, "");
+    
+    // Check if we have 10 digits
+    if (cleaned.length === 10) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    }
+    
+    // Return original if not 10 digits
+    return phone;
+  };
+
   useEffect(() => {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -129,7 +145,7 @@ const MyCharacters = () => {
                       {/* Contact Info */}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="w-4 h-4 text-secondary" />
-                        <span>{character.charinfoData.phone || "No phone"}</span>
+                        <span>{formatPhoneNumber(character.charinfoData.phone)}</span>
                       </div>
 
                       {/* Money */}
