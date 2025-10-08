@@ -205,11 +205,11 @@ GET https://servers-frontend.fivem.net/api/servers/single/{serverCode}
 GET https://discord.com/api/guilds/{guildId}/widget.json
 ```
 
-### Tebex Headless API
+### Tebex Public Store API
 ```
-GET https://headless.tebex.io/api/accounts/{identifier}/webstore
-GET https://headless.tebex.io/api/accounts/{identifier}/categories?includePackages=1
-GET https://headless.tebex.io/api/accounts/{identifier}/packages/{id}
+GET https://{identifier}.tebex.io/api/information
+GET https://{identifier}.tebex.io/api/categories
+GET https://{identifier}.tebex.io/api/packages/{id}
 ```
 
 **Note:** API calls are proxied server-side via Vercel functions at `/api/tebex/*`

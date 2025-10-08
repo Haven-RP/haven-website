@@ -85,15 +85,15 @@ givemoney {player} 1000000
 ## Architecture
 
 ### Backend Proxy (Vercel Serverless Functions)
-To avoid CORS issues, Tebex API calls are proxied through Vercel serverless functions:
+Tebex API calls are proxied through Vercel serverless functions:
 
-- `api/tebex/information.ts` - Webstore details
-- `api/tebex/categories.ts` - All categories  
-- `api/tebex/category/[id].ts` - Packages in category
-- `api/tebex/package/[id].ts` - Single package details
+- `api/tebex/information.ts` - Fetches `https://{store}.tebex.io/api/information`
+- `api/tebex/categories.ts` - Fetches `https://{store}.tebex.io/api/categories`
+- `api/tebex/category/[id].ts` - Fetches `https://{store}.tebex.io/api/categories/{id}`
+- `api/tebex/package/[id].ts` - Fetches `https://{store}.tebex.io/api/packages/{id}`
 
 ### Frontend (`src/hooks/useTebex.ts`)
-React hooks call the backend API routes instead of Tebex directly:
+React hooks call the backend API routes:
 
 - `useTebexWebstore()` - Fetches store information
 - `useTebexCategories()` - Gets all categories
@@ -103,7 +103,7 @@ React hooks call the backend API routes instead of Tebex directly:
 ## Features Included
 
 ### ✅ What Works
-- ✅ Fetches all categories from Tebex via serverless functions
+- ✅ Fetches all categories and packages from Tebex public API
 - ✅ Displays packages with images, descriptions, prices
 - ✅ Shows sale/discount badges
 - ✅ Tabbed navigation between categories
@@ -112,19 +112,18 @@ React hooks call the backend API routes instead of Tebex directly:
 - ✅ Currency display from your Tebex account
 - ✅ Loading states and error handling
 - ✅ Disabled packages shown but not purchasable
-- ✅ CORS-free (requests go through backend)
 - ✅ Response caching (5-10 minutes)
 
 ### 📦 API Flow
 ```
-Frontend → Vercel API Routes → Tebex API → Response
+Frontend → Vercel API Routes → Tebex Store API → Response
 ```
 
 This architecture ensures:
-- No CORS issues
-- Secure token storage (server-side only)
+- Clean API proxying
 - Response caching
 - Better error handling
+- Consistent data flow
 
 ## Checkout Flow
 

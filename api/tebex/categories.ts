@@ -30,7 +30,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const response = await fetch(`${TEBEX_BASE_URL}/accounts/${secretKey}/categories?includePackages=1`, {
+    // Fetch categories directly from the store URL
+    const response = await fetch(`https://${secretKey}.tebex.io/api/categories`, {
       headers: {
         'Accept': 'application/json',
       },

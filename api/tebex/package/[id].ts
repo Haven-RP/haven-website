@@ -35,7 +35,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const response = await fetch(`${TEBEX_BASE_URL}/accounts/${secretKey}/packages/${id}`, {
+    // Fetch package details directly from the store URL
+    const response = await fetch(`https://${secretKey}.tebex.io/api/packages/${id}`, {
       headers: {
         'Accept': 'application/json',
       },
