@@ -7,13 +7,15 @@ interface DiscordRole {
   id: string;
   name: string;
   color: number;
-  position: number;
-  // Add other role properties as needed
 }
 
 interface DiscordRolesResponse {
-  roles: DiscordRole[];
-  // Adjust based on actual API response structure
+  success: boolean;
+  message: string;
+  discord_id: string;
+  roles: {
+    [key: string]: DiscordRole;
+  };
 }
 
 export const useDiscordRoles = (discordUserId: string | null | undefined) => {

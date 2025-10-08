@@ -28,7 +28,7 @@ VITE_SUPABASE_URL=https://cvxageyyiyyccuqcgbgu.supabase.co
 VITE_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # HavenRP Discord Roles API
-VITE_DISCORD_ROLES_API_URL=http://192.99.168.114:8080/api/discord/roles
+VITE_DISCORD_ROLES_API_URL=https://api.haven-rp.com/api/discord/roles
 VITE_HAVEN_API_KEY=your-api-key-here
 ```
 
@@ -36,7 +36,7 @@ VITE_HAVEN_API_KEY=your-api-key-here
 
 The integration calls:
 ```
-GET http://192.99.168.114:8080/api/discord/roles/{discordUserId}
+GET https://api.haven-rp.com/api/discord/roles/{discordUserId}
 Headers:
   - accept: application/json
   - X-API-Key: {VITE_HAVEN_API_KEY}
@@ -44,26 +44,29 @@ Headers:
 
 ## Expected API Response
 
-The API should return a JSON response in this format:
+The API returns a JSON response in this format:
 
 ```json
 {
-  "roles": [
-    {
-      "id": "1234567890",
-      "name": "Admin",
-      "color": 16711680,
-      "position": 10
-    },
-    {
-      "id": "0987654321",
+  "success": true,
+  "message": "Retrieved 10 roles",
+  "discord_id": "178543347424690176",
+  "roles": {
+    "1381715623041826938": {
+      "id": "1381715623041826938",
       "name": "Staff",
-      "color": 3447003,
-      "position": 5
+      "color": 7640178
+    },
+    "1414073546216308799": {
+      "id": "1414073546216308799",
+      "name": "Senior Admin",
+      "color": 8886702
     }
-  ]
+  }
 }
 ```
+
+Note: `roles` is an object with role IDs as keys, not an array.
 
 ## How It Works
 

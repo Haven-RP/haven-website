@@ -21,8 +21,10 @@ const Members = () => {
     // Fetch Discord roles from API
     const { data: discordRolesData, isLoading: rolesLoading, error: rolesError } = useDiscordRoles(discordUserId);
     
-    // Extract role names for easy checking
-    const userRoles = discordRolesData?.roles?.map(role => role.name) || [];
+    // Extract role names from the roles object (roles is an object, not an array)
+    const userRoles = discordRolesData?.roles 
+        ? Object.values(discordRolesData.roles).map(role => role.name)
+        : [];
 
     useEffect(() => {
         // Set up auth state listener
