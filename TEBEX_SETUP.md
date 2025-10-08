@@ -7,16 +7,16 @@ This guide will help you configure the HavenRP store with Tebex Headless API.
 1. A Tebex account with a configured webstore
 2. Products and categories set up in your Tebex dashboard
 
-## Step 1: Get Your Tebex Secret Key
+## Step 1: Get Your Tebex Webstore Identifier
 
-⚠️ **Important:** The Headless API requires your **Secret Key**, not the Public Token.
+⚠️ **Important:** The Headless API uses your **Webstore Identifier** (not a secret key).
 
 1. Go to [Tebex Creator Dashboard](https://creator.tebex.io/)
-2. Navigate to **Integrations** → **API Keys**
-3. Find or create your **Secret Key** (the one that starts with `sk-`)
-4. Copy the secret key - it should look like: `sk-xxxxxxxxxxxxxxxx`
+2. Look at your webstore URL - it's in the format: `your-store.tebex.io`
+3. The **identifier** is the part before `.tebex.io` (e.g., `havenrp`)
+4. This identifier is used in API calls and is public-facing
 
-**Security Note:** This key has full access to your store. Never commit it to git or expose it on the frontend. Our serverless architecture keeps it secure on the backend only.
+**Note:** The webstore identifier is public and safe to use. There's no secret key needed for the Headless API - it only allows reading public store information.
 
 ## Step 2: Configure Environment Variables
 
@@ -24,10 +24,10 @@ This guide will help you configure the HavenRP store with Tebex Headless API.
 Add to your `.env.local` file:
 
 ```env
-TEBEX_SECRET_KEY=sk-your-secret-key-here
+TEBEX_SECRET_KEY=your-store-identifier
 ```
 
-⚠️ **Never commit `.env.local` to git!** This file should be in your `.gitignore`.
+Example: If your store is `havenrp.tebex.io`, use `havenrp`.
 
 ### Vercel Deployment
 Add the environment variable in Vercel:
@@ -37,7 +37,7 @@ Add the environment variable in Vercel:
 3. Click **Add New**
 4. Add the variable:
    - **Name:** `TEBEX_SECRET_KEY`
-   - **Value:** `sk-your-secret-key-here` (paste your actual secret key)
+   - **Value:** Your webstore identifier (e.g., `havenrp`)
    - **Environments:** Check all three boxes (Production, Preview, Development)
 5. Click **Save**
 6. **Important:** Redeploy your project:
@@ -201,14 +201,12 @@ Navigate to: `http://localhost:8080/store`
 
 ## Security Notes
 
-⚠️ **Critical:**
-- **Secret Key** has full access to your Tebex store
-- **Only** stored server-side in Vercel serverless functions
-- **Never** commit to git or expose on frontend
-- **Never** use in client-side code
-- All API calls are proxied through secure backend
-- Frontend never has access to the secret key
-- This architecture is why we use serverless functions
+ℹ️ **Note:**
+- **Webstore Identifier** is public and safe (part of your store URL)
+- Headless API only provides read access to public store data
+- No sensitive keys are exposed
+- API calls are still proxied through backend for consistency
+- Users can't modify store data, only view and checkout
 
 ## Support
 

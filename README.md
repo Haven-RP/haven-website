@@ -79,8 +79,8 @@ VITE_SUPABASE_KEY=your-supabase-anon-key
 VITE_DISCORD_ROLES_API_URL=https://api.haven-rp.com/api/discord/roles
 VITE_HAVEN_API_KEY=your-havenrp-api-key
 
-# Tebex Store Configuration (Secret Key for backend API)
-TEBEX_SECRET_KEY=sk-your-secret-key-here
+# Tebex Store Configuration (Webstore Identifier)
+TEBEX_SECRET_KEY=your-store-identifier
 ```
 
 ### Supabase Setup
@@ -93,14 +93,13 @@ TEBEX_SECRET_KEY=sk-your-secret-key-here
 
 ### Tebex Setup
 
-1. Get your **Secret Key** from [Tebex Creator Dashboard](https://creator.tebex.io/)
-2. Navigate to **Integrations** → **API Keys**
-3. Copy your **Secret Key** (starts with `sk-`)
-4. Add to Vercel environment variables as `TEBEX_SECRET_KEY`
-5. Add to `.env.local` as `TEBEX_SECRET_KEY` for local development
-6. Update `tebexWebstoreIdentifier` in `src/config/site.ts`
+1. Find your webstore URL (e.g., `havenrp.tebex.io`)
+2. Extract the identifier (the part before `.tebex.io`)
+3. Add to Vercel environment variables as `TEBEX_SECRET_KEY` = `your-identifier`
+4. Add to `.env.local` as `TEBEX_SECRET_KEY` for local development
+5. Update `tebexWebstoreIdentifier` in `src/config/site.ts` with full URL
 
-⚠️ **Important:** Use Secret Key (not Public Token) for the Headless API.
+ℹ️ **Note:** The Headless API uses your public webstore identifier, not a secret key.
 
 See [TEBEX_SETUP.md](./TEBEX_SETUP.md) for detailed instructions.
 
@@ -208,14 +207,12 @@ GET https://discord.com/api/guilds/{guildId}/widget.json
 
 ### Tebex Headless API
 ```
-GET https://plugin.tebex.io/information
-GET https://plugin.tebex.io/categories
-GET https://plugin.tebex.io/categories/{categoryId}
-GET https://plugin.tebex.io/packages/{packageId}
-Headers: X-Tebex-Secret: {TEBEX_SECRET_KEY}
+GET https://headless.tebex.io/api/accounts/{identifier}/webstore
+GET https://headless.tebex.io/api/accounts/{identifier}/categories?includePackages=1
+GET https://headless.tebex.io/api/accounts/{identifier}/packages/{id}
 ```
 
-**Note:** Direct API calls are made server-side via Vercel functions at `/api/tebex/*`
+**Note:** API calls are proxied server-side via Vercel functions at `/api/tebex/*`
 
 ## 📜 Available Scripts
 

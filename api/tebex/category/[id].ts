@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
-const TEBEX_BASE_URL = "https://plugin.tebex.io";
+// Use Headless API for web storefronts
+const TEBEX_BASE_URL = "https://headless.tebex.io/api";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers for all responses
@@ -34,9 +35,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const response = await fetch(`${TEBEX_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${TEBEX_BASE_URL}/accounts/${secretKey}/categories/${id}?includePackages=1`, {
       headers: {
-        'X-Tebex-Secret': secretKey,
+        'Accept': 'application/json',
       },
     });
 
