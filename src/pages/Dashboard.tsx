@@ -8,16 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import pageBg from "@/assets/page-bg.png";
-import { Shield, Users, Crown, Star } from "lucide-react";
+import { Shield, Users, Crown, Star, Loader2 } from "lucide-react";
+import { useDiscordRoles } from "@/hooks/useDiscordRoles";
 
 const Members = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
+    const [discordUserId, setDiscordUserId] = useState<string | null>(null);
 
-    // Example Discord roles - in production, fetch from Discord API or store in DB
-    const [userRoles, setUserRoles] = useState<string[]>([]);
+    // Fetch Discord roles from API
+    const { data: discordRolesData, isLoading: rolesLoading, error: rolesError } = useDiscordRoles(discordUserId);
+    
+    // Extract role names for easy checking
+    const userRoles = discordRolesData?.roles?.map(role => role.name) || [];
 
     useEffect(() => {
         // Set up auth state listener
@@ -29,11 +34,11 @@ const Members = () => {
                 if (!session) {
                     navigate("/auth");
                 } else {
-                    // Example: Extract Discord roles from user metadata
-                    // In production, you'd fetch this from Discord API or your database
-                    const discordMetadata = session.user.user_metadata;
-                    const roles = discordMetadata?.discord_roles || [];
-                    setUserRoles(roles);
+                    // Extract Discord user ID from provider metadata
+                    const discordId = session.user.user_metadata?.provider_id || 
+                                     session.user.user_metadata?.sub ||
+                                     session.user.identities?.[0]?.id;
+                    setDiscordUserId(discordId);
                 }
                 setLoading(false);
             }
@@ -47,9 +52,11 @@ const Members = () => {
             if (!session) {
                 navigate("/auth");
             } else {
-                const discordMetadata = session.user.user_metadata;
-                const roles = discordMetadata?.discord_roles || [];
-                setUserRoles(roles);
+                // Extract Discord user ID from provider metadata
+                const discordId = session.user.user_metadata?.provider_id || 
+                                 session.user.user_metadata?.sub ||
+                                 session.user.identities?.[0]?.id;
+                setDiscordUserId(discordId);
             }
             setLoading(false);
         });
@@ -101,8 +108,17 @@ const Members = () => {
                             </div>
 
                             {/* User Roles */}
-                            <div className="flex gap-2 flex-wrap">
-                                {userRoles.length > 0 ? (
+                            <div className="flex gap-2 flex-wrap items-center">
+                                {rolesLoading ? (
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span className="text-sm">Loading roles...</span>
+                                    </div>
+                                ) : rolesError ? (
+                                    <Badge variant="destructive" className="text-xs">
+                                        Error loading roles
+                                    </Badge>
+                                ) : userRoles.length > 0 ? (
                                     userRoles.map((role) => (
                                         <Badge key={role} variant="secondary">
                                             {role}
@@ -216,16 +232,20 @@ const Members = () => {
 
                         {/* Info Box */}
                         <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-lg p-6">
-                            <h3 className="font-semibold mb-2">Note about Discord Roles</h3>
-                            <p className="text-sm text-muted-foreground">
-                                This page demonstrates Discord role-based content gating. In production, you would:
-                            </p>
-                            <ul className="text-sm text-muted-foreground list-disc list-inside mt-2 space-y-1">
-                                <li>Fetch Discord roles from Discord API after OAuth</li>
-                                <li>Store roles in your database for faster access</li>
-                                <li>Sync roles periodically to keep them updated</li>
-                                <li>Use the <code className="bg-background px-1 rounded">hasRole()</code> function to conditionally render content</li>
-                            </ul>
+                            <h3 className="font-semibold mb-2">Discord Integration Status</h3>
+                            <div className="space-y-2 text-sm">
+                                <p className="text-muted-foreground">
+                                    <strong>Discord ID:</strong> {discordUserId || "Not found"}
+                                </p>
+                                <p className="text-muted-foreground">
+                                    <strong>Roles Status:</strong> {rolesLoading ? "Loading..." : rolesError ? "Error fetching roles" : `${userRoles.length} roles loaded`}
+                                </p>
+                                {rolesError && (
+                                    <p className="text-destructive text-xs">
+                                        Error: {rolesError.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </main>
