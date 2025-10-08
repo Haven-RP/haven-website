@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import pageBg from "@/assets/page-bg.png";
-import { Loader2, User as UserIcon, Phone, DollarSign, CreditCard, Coins, Package, Heart, Shield, Copy, Check, Car } from "lucide-react";
+import { Loader2, User as UserIcon, Phone, DollarSign, CreditCard, Coins, Package, Heart, Shield, Copy, Check, Car, Clock } from "lucide-react";
 import { useFivemCharacters } from "@/hooks/useFivemCharacters";
 import { CharacterInventoryModal } from "@/components/CharacterInventoryModal";
 import { CharacterVehiclesModal } from "@/components/CharacterVehiclesModal";
@@ -72,6 +72,24 @@ const MyCharacters = () => {
         duration: 2000,
       });
     }
+  };
+
+  // Format last logged out timestamp to local timezone
+  const formatLastLogout = (timestamp: string): string => {
+    // Handle timestamp format "2025-10-08T09:10:23" (no timezone indicator)
+    // If no 'Z' is present, assume UTC and add it
+    const normalizedTimestamp = timestamp.includes('Z') ? timestamp : `${timestamp}Z`;
+    const date = new Date(normalizedTimestamp);
+    
+    // Format: "Jan 15, 2025 at 3:45 PM EST"
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
   };
 
   useEffect(() => {
@@ -263,6 +281,14 @@ const MyCharacters = () => {
                             </Badge>
                           </div>
                         )}
+                      </div>
+
+                      {/* Last Logged Out */}
+                      <div className="pt-3 border-t border-white/10">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Last seen: {formatLastLogout(character.last_logged_out)}</span>
+                        </div>
                       </div>
 
                       {/* Action Buttons */}

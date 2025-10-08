@@ -17,19 +17,23 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
 - **Wiki** - Embedded Notion documentation
 
 ### Authenticated Features
-- **Discord OAuth** - One-click authentication via Supabase
+- **Discord OAuth** - One-click authentication via Supabase (streamlined, no intermediate page)
 - **Dashboard** - Member area with Discord role-based content gating
-- **My Characters** - View FiveM characters with detailed stats and inventory
-  - Character cards with money, health, job, and gang info
-  - Click-to-copy phone numbers and citizen IDs
-  - Full inventory modal with item metadata
-- **Account Dropdown** - Streamlined user menu in navigation
+- **My Characters** - Comprehensive character management
+  - Character cards with money (cash, bank, crypto), health percentages, job, and gang
+  - Formatted phone numbers `(XXX) XXX-XXXX` with click-to-copy
+  - Click-to-copy citizen IDs
+  - Full inventory modal with searchable items and metadata
+  - Vehicle viewer with comprehensive details
+  - Vehicle storage modal (glovebox & trunk) with search
+- **Account Dropdown** - Streamlined user menu in navigation (Dashboard, My Characters, Sign Out)
 
 ### Real-Time Integrations
 - **Live Server Stats** - FiveM player count and server status
 - **Discord Members** - Real-time Discord online member count
 - **Discord Roles** - Automatic role fetching and display
-- **Character Data** - Live FiveM character and inventory sync
+- **Character Data** - Live FiveM character, inventory, and vehicle sync
+- **Vehicle Data** - Real-time vehicle stats, condition, and storage
 
 ## 🛠️ Tech Stack
 
@@ -102,7 +106,11 @@ haven-website/
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useDiscordRoles.ts
 │   │   ├── useFivemCharacters.ts
+│   │   ├── useFivemCharacter.ts
+│   │   ├── useFivemVehicles.ts
+│   │   ├── useFivemVehicleInventory.ts
 │   │   ├── useFivemStats.ts
+│   │   ├── useDiscordStats.ts
 │   │   └── ...
 │   ├── config/             # Site configuration
 │   │   └── site.ts         # Centralized config
@@ -154,6 +162,18 @@ Headers: X-API-Key: {VITE_HAVEN_API_KEY}
 #### Character Details
 ```
 GET https://api.haven-rp.com/api/fivem/character/{citizenid}
+Headers: X-API-Key: {VITE_HAVEN_API_KEY}
+```
+
+#### Character Vehicles
+```
+GET https://api.haven-rp.com/api/fivem/character/{citizenid}/vehicles
+Headers: X-API-Key: {VITE_HAVEN_API_KEY}
+```
+
+#### Vehicle Inventory
+```
+GET https://api.haven-rp.com/api/fivem/character/{citizenid}/vehicle/{plate}/inventory
 Headers: X-API-Key: {VITE_HAVEN_API_KEY}
 ```
 
@@ -232,13 +252,17 @@ export const siteConfig = {
 
 ## 🔒 Authentication Flow
 
-1. User clicks "Sign In" button
-2. Supabase initiates Discord OAuth
+1. User clicks "Sign In" button in navigation
+2. Supabase directly initiates Discord OAuth (no intermediate page)
 3. User authorizes on Discord
-4. Redirected back to homepage
-5. Discord ID extracted from session
-6. API calls fetch roles and characters
-7. Dashboard and My Characters pages populate
+4. Redirected back to homepage with active session
+5. Navigation updates to show Account dropdown menu
+6. Discord ID extracted from session metadata
+7. API calls fetch:
+   - Discord roles for content gating
+   - User's FiveM characters
+   - Character inventory and vehicle data on demand
+8. Dashboard and My Characters pages populate with live data
 
 ## 🎮 Features in Detail
 
@@ -249,10 +273,35 @@ Dashboard shows different content based on Discord roles:
 - **All Members** - General resources
 
 ### Character Management
-- View all characters linked to Discord account
-- See real-time stats (money, health, armor)
-- Browse complete inventory with weapon details
-- Copy phone numbers and citizen IDs with one click
+- **Overview** - View all characters linked to Discord account
+- **Stats Display**
+  - Money breakdown (cash, bank, crypto) with formatted values
+  - Health displayed as value and percentage (max 200)
+  - Armor value
+  - Job and gang information with grades
+  - Formatted phone numbers: `(XXX) XXX-XXXX`
+- **Inventory System**
+  - Searchable inventory modal with real-time filtering
+  - Item metadata (durability, ammo, serial numbers, components)
+  - Formatted item names (e.g., "WEAPON_PISTOL" → "Pistol")
+  - Grid layout with detailed item cards
+- **Vehicle Management**
+  - Comprehensive vehicle list sorted by favorites
+  - Vehicle categories with color-coded badges
+  - Special badges for "1 of 1" and "Import" vehicles
+  - Real-time stats: fuel, mileage, engine condition, body condition
+  - Condition percentages (max 1000) with color indicators
+  - Click-to-copy license plates
+  - Searchable by category, type, make, model, or plate
+- **Vehicle Storage**
+  - Separate glovebox and trunk inventories
+  - Searchable storage items
+  - Real-time item counts and amounts
+  - Nested modal for storage details
+- **Copy Features**
+  - One-click copy for phone numbers and citizen IDs
+  - Visual feedback with checkmark icons
+  - Toast notifications on successful copy
 
 ### Live Stats
 - Real-time FiveM server player count
@@ -260,10 +309,33 @@ Dashboard shows different content based on Discord roles:
 - Server status indicator
 - Auto-refresh every 60 seconds
 
+## 🔍 Search Features
+
+All modals include real-time search functionality:
+
+### Character Inventory Search
+- Filter by item name (original or formatted)
+- Instant results with "X of Y" counter
+- Case-insensitive partial matching
+
+### Vehicle Search
+- Filter by category (Super, Sports, Off-Road, etc.)
+- Filter by type (1of1, Import, Regular)
+- Search by make/brand (e.g., "Grotti", "Pegassi")
+- Search by model (e.g., "Turismo", "Zentorno")
+- Search by license plate
+- "Showing X of Y vehicles" counter
+- Empty state with helpful message
+
+### Vehicle Storage Search
+- Filter glovebox and trunk simultaneously
+- Search by item name
+- Individual section counters
+- Real-time filtering
+
 ## 📚 Documentation
 
-- [My Characters Feature](./MY_CHARACTERS_FEATURE.md)
-- [Discord Roles Setup](./DISCORD_ROLES_SETUP.md)
+Additional documentation coming soon.
 
 ## 🤝 Contributing
 
