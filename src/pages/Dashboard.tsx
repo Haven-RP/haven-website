@@ -144,6 +144,15 @@ const Members = () => {
                             <CardContent className="space-y-4">
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div className="p-4 border border-border rounded-lg">
+                                        <h3 className="font-semibold mb-2">My Characters</h3>
+                                        <p className="text-sm text-muted-foreground mb-3">
+                                            View your FiveM characters and inventory
+                                        </p>
+                                        <Button variant="outline" size="sm" onClick={() => navigate("/my-characters")}>
+                                            View Characters
+                                        </Button>
+                                    </div>
+                                    <div className="p-4 border border-border rounded-lg">
                                         <h3 className="font-semibold mb-2">Server Rules</h3>
                                         <p className="text-sm text-muted-foreground mb-3">
                                             Review our community guidelines

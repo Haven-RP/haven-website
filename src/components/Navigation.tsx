@@ -24,6 +24,11 @@ export const Navigation = () => {
     { name: "Merch", path: "https://merch.haven-rp.com/", external: true },
   ];
 
+  const authNavLinks = [
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "My Characters", path: "/my-characters" },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
   useEffect(() => {
@@ -77,6 +82,19 @@ export const Navigation = () => {
                   {link.name}
                 </Link>
               )
+            ))}
+            {user && authNavLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`font-medium transition-all duration-300 ${
+                  isActive(link.path)
+                    ? "text-secondary"
+                    : "text-foreground/70 hover:text-secondary"
+                }`}
+              >
+                {link.name}
+              </Link>
             ))}
           </div>
 
@@ -169,6 +187,25 @@ export const Navigation = () => {
                       </Link>
                     )
                   ))}
+                  {user && (
+                    <>
+                      <div className="border-t border-primary/20 my-2"></div>
+                      {authNavLinks.map((link) => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          className={`font-medium transition-all duration-300 py-2 ${
+                            isActive(link.path)
+                              ? "text-secondary"
+                              : "text-foreground/70 hover:text-secondary"
+                          }`}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    </>
+                  )}
                   <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-primary/20">
                     <Button
                       variant="outline"
