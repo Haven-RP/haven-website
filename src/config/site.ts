@@ -39,7 +39,7 @@ export const siteConfig = {
   twitter: "",
   
   // Tebex Store
-  tebexWebstoreIdentifier: "havenrp.tebex.io", // Your Tebex webstore URL
+  tebexWebstoreIdentifier: "store.haven-rp.com", // Your Tebex webstore URL (custom domain)
   
   // Meta
   metaTitle: "HavenRP — Serious FiveM Roleplay",

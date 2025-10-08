@@ -172,7 +172,9 @@ const Store = () => {
               {webstore && (
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Sparkles className="w-4 h-4 text-accent" />
-                  <span>Powered by Tebex</span>
+                  <span>
+                    Visit our <a href={`https://${siteConfig.tebexWebstoreIdentifier}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">online store</a>
+                  </span>
                   <Badge variant="outline" className="ml-2">
                     {webstore.account.currency.symbol} {webstore.account.currency.iso}
                   </Badge>
