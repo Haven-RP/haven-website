@@ -11,7 +11,11 @@ export const siteConfig = {
     {
       date: "2025-10-19T00:00:00Z",
       event: "Flying High Race",
-    }
+    },
+    {
+      date: "2025-10-20T21:00:00Z",
+      event: "Full Throttle Repair Fashion Show",
+    },
   ],
 
   // Discord

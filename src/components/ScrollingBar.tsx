@@ -1,6 +1,11 @@
 import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
 
-export const ScrollingBar = () => {
+interface ScrollingBarProps {
+    className?: string;
+}
+
+export const ScrollingBar = ({ className }: ScrollingBarProps = {}) => {
     const events = siteConfig.newsTicker;
 
     // Convert UTC dates to local times with timezone shortcodes
@@ -15,7 +20,7 @@ export const ScrollingBar = () => {
             hour: "2-digit",
             minute: "2-digit",
             timeZoneName: "short", // Adds CST, EST, etc.
-        });
+        }).replace(',', ''); // Remove comma between date and time
 
         return `${dateString} - ${event.event}`;
     });
@@ -24,7 +29,7 @@ export const ScrollingBar = () => {
     const repeatedText = Array(20).fill(localizedEvents.join(" • ")).join(" • ");
 
     return (
-        <div className="w-full overflow-hidden bg-gradient-neon py-3">
+        <div className={cn("w-full overflow-hidden bg-gradient-neon py-3", className)}>
             <div className="flex whitespace-nowrap animate-scroll">
         <span className="text-black font-heading font-bold text-2xl tracking-tight">
           {repeatedText}

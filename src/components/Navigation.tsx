@@ -1,6 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { MessageSquare, Gamepad2, LogIn, LogOut, Menu } from "lucide-react";
+import { MessageSquare, Gamepad2, LogIn, LogOut, Menu, User as UserIcon, ChevronDown } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { ScrollingBar } from "@/components/ScrollingBar";
 import havenLogo from "@/assets/haven-logo.png";
@@ -8,9 +8,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -42,6 +51,20 @@ export const Navigation = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  const handleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${window.location.origin}/`
+      }
+    });
+    
+    if (error) {
+      console.error("Error signing in with Discord:", error.message);
+    }
   };
 
   return (
@@ -97,29 +120,59 @@ export const Navigation = () => {
                   Discord
                 </a>
               </Button>
+              
               {user ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="transition-all duration-300"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="transition-all duration-300"
+                    >
+                      <UserIcon className="w-4 h-4 mr-2" />
+                      Account
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-lg border-primary/30">
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                      {user.email}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/dashboard")}
+                      className="cursor-pointer hover:bg-primary/20 focus:bg-primary/20"
+                    >
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/my-characters")}
+                      className="cursor-pointer hover:bg-primary/20 focus:bg-primary/20"
+                    >
+                      My Characters
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem 
+                      onClick={handleSignOut}
+                      className="cursor-pointer hover:bg-destructive/20 focus:bg-destructive/20 text-destructive"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button
                   variant="secondary"
                   size="sm"
                   className="transition-all duration-300"
-                  asChild
+                  onClick={handleSignIn}
                 >
-                  <Link to="/auth">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Link>
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
                 </Button>
               )}
+              
               <Button
                 size="sm"
                 className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
@@ -185,32 +238,64 @@ export const Navigation = () => {
                         Discord
                       </a>
                     </Button>
+                    
                     {user ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="transition-all duration-300 w-full"
-                        onClick={() => {
-                          handleSignOut();
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sign Out
-                      </Button>
+                      <>
+                        <div className="border-t border-primary/20 my-2"></div>
+                        <div className="px-2 py-1">
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start w-full"
+                          onClick={() => {
+                            navigate("/dashboard");
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          Dashboard
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start w-full"
+                          onClick={() => {
+                            navigate("/my-characters");
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          My Characters
+                        </Button>
+                        <div className="border-t border-primary/20 my-2"></div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="transition-all duration-300 w-full text-destructive hover:bg-destructive/20"
+                          onClick={() => {
+                            handleSignOut();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </>
                     ) : (
                       <Button
                         variant="secondary"
                         size="sm"
                         className="transition-all duration-300 w-full"
-                        asChild
+                        onClick={() => {
+                          handleSignIn();
+                          setMobileMenuOpen(false);
+                        }}
                       >
-                        <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                          <LogIn className="w-4 h-4 mr-2" />
-                          Sign In
-                        </Link>
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Sign In
                       </Button>
                     )}
+                    
                     <Button
                       size="sm"
                       className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300 w-full"
