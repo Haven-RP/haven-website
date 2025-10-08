@@ -117,10 +117,19 @@ const Store = () => {
 
   if (webstoreLoading || categoriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <span className="text-muted-foreground">Loading store...</span>
+      <div
+        className="min-h-screen bg-cover bg-center bg-fixed relative"
+        style={{ backgroundImage: `url(${pageBg})` }}
+      >
+        <div className="relative z-10">
+          <Navigation />
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading store...</span>
+            </div>
+          </div>
+          <Footer />
         </div>
       </div>
     );
@@ -134,7 +143,7 @@ const Store = () => {
       >
         <div className="relative z-10">
           <Navigation />
-          <main className="container mx-auto px-4 pt-32 pb-20">
+          <main className="container mx-auto px-4 pt-40 pb-20">
             <Card className="bg-card/90 backdrop-blur-sm border-destructive/50 max-w-2xl mx-auto">
               <CardContent className="pt-6">
                 <p className="text-center text-destructive text-lg mb-2">Error loading store</p>
@@ -161,7 +170,7 @@ const Store = () => {
       <div className="relative z-10">
         <Navigation />
 
-        <main className="container mx-auto px-4 pt-32 pb-20">
+        <main className="container mx-auto px-4 pt-40 pb-20">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8 text-center">
