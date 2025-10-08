@@ -20,7 +20,7 @@ export const ScrollingBar = ({ className }: ScrollingBarProps = {}) => {
             hour: "2-digit",
             minute: "2-digit",
             timeZoneName: "short", // Adds CST, EST, etc.
-        });
+        }).replace(',', ''); // Remove comma between date and time
 
         return `${dateString} - ${event.event}`;
     });
