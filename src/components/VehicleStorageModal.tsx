@@ -39,12 +39,12 @@ export const VehicleStorageModal = ({
       <div className="mb-6">
         <h3 className="text-lg font-heading font-bold mb-3 flex items-center gap-2">
           <Icon className="w-5 h-5 text-primary" />
-          {title} ({items.length} items)
+          {title} ({items.length})
         </h3>
         
         {items.length === 0 ? (
-          <div className="bg-black/40 border border-white/10 rounded-lg p-6 text-center">
-            <p className="text-muted-foreground text-sm">Empty</p>
+          <div className="bg-black/40 border border-white/10 rounded-lg p-8 text-center">
+            <p className="text-muted-foreground">Empty</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -53,10 +53,12 @@ export const VehicleStorageModal = ({
                 key={index}
                 className="bg-black/40 border border-white/10 rounded-lg p-4 hover:border-primary/30 transition-colors"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between mb-2">
                   <h4 className="font-semibold text-foreground">
                     {formatItemName(item.name)}
                   </h4>
+                </div>
+                <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs">
                     x{item.amount}
                   </Badge>

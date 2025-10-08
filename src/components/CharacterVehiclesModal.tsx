@@ -1,11 +1,12 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useFivemVehicles } from "@/hooks/useFivemVehicles";
-import { Loader2, Car, Fuel, Wrench, Heart, Star, Package } from "lucide-react";
+import { Loader2, Car, Fuel, Wrench, Heart, Star, Package, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { VehicleStorageModal } from "./VehicleStorageModal";
+import { useToast } from "@/hooks/use-toast";
 
 interface CharacterVehiclesModalProps {
   open: boolean;
@@ -20,24 +21,39 @@ export const CharacterVehiclesModal = ({
   citizenid,
   characterName,
 }: CharacterVehiclesModalProps) => {
+  const { toast } = useToast();
   const { data: vehiclesData, isLoading, error } = useFivemVehicles(open ? citizenid : null);
   const [selectedVehicle, setSelectedVehicle] = useState<{
     plate: string;
     name: string;
   } | null>(null);
+  const [copiedPlates, setCopiedPlates] = useState<{ [key: string]: boolean }>({});
 
   const getVehicleCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      super: "text-accent",
-      sports: "text-primary",
-      sportsclassics: "text-secondary",
-      muscle: "text-red-500",
-      sedans: "text-blue-accent",
-      suvs: "text-green-500",
-      offroad: "text-yellow-500",
-      bikes: "text-purple-500",
+      super: "bg-accent/20 text-accent border-accent/30",
+      sports: "bg-primary/20 text-primary border-primary/30",
+      sportsclassics: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+      muscle: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      sedans: "bg-blue-accent/20 text-blue-accent border-blue-accent/30",
+      suvs: "bg-green-500/20 text-green-400 border-green-500/30",
+      offroad: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+      bikes: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+      compacts: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+      coupes: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+      vans: "bg-gray-500/20 text-gray-400 border-gray-500/30",
     };
-    return colors[category.toLowerCase()] || "text-muted-foreground";
+    return colors[category.toLowerCase()] || "bg-muted/20 text-muted-foreground border-muted/30";
+  };
+
+  const formatCategory = (category: string) => {
+    const formatted: { [key: string]: string } = {
+      sportsclassics: "Sports Classics",
+      offroad: "Off-Road",
+      compacts: "Compacts",
+      coupes: "Coupes",
+    };
+    return formatted[category.toLowerCase()] || category.charAt(0).toUpperCase() + category.slice(1);
   };
 
   const getConditionColor = (value: number) => {
@@ -45,6 +61,29 @@ export const CharacterVehiclesModal = ({
     if (value >= 700) return "text-yellow-500";
     if (value >= 500) return "text-orange-500";
     return "text-red-500";
+  };
+
+  const copyToClipboard = async (text: string, label: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedPlates({ ...copiedPlates, [id]: true });
+      toast({
+        title: "Copied!",
+        description: `${label} copied to clipboard`,
+        duration: 2000,
+      });
+      
+      setTimeout(() => {
+        setCopiedPlates((prev) => ({ ...prev, [id]: false }));
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
   };
 
   return (
@@ -94,15 +133,24 @@ export const CharacterVehiclesModal = ({
                               <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                             )}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="font-mono text-xs">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge 
+                              variant="outline" 
+                              className="font-mono text-xs cursor-pointer hover:bg-primary/10 transition-colors group"
+                              onClick={() => copyToClipboard(vehicle.plate, "License plate", `plate-${index}`)}
+                            >
                               {vehicle.plate}
+                              {copiedPlates[`plate-${index}`] ? (
+                                <Check className="w-3 h-3 ml-1.5 text-green-500" />
+                              ) : (
+                                <Copy className="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              )}
                             </Badge>
                             <Badge 
-                              variant="secondary" 
+                              variant="outline" 
                               className={`text-xs ${getVehicleCategoryColor(vehicle.category)}`}
                             >
-                              {vehicle.category}
+                              {formatCategory(vehicle.category)}
                             </Badge>
                           </div>
                         </div>
