@@ -202,14 +202,14 @@ export const CharacterVehiclesModal = ({
                           <Wrench className="w-4 h-4 text-accent" />
                           <span className="text-muted-foreground">Engine:</span>
                           <span className={`font-semibold ${getConditionColor(vehicle.engine)}`}>
-                            {vehicle.engine.toFixed(0)} ({((vehicle.engine / 1000) * 100).toFixed(0)}%)
+                            {vehicle.engine.toFixed(0)} ({Math.floor((vehicle.engine / 1000) * 100)}%)
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Heart className="w-4 h-4 text-secondary" />
                           <span className="text-muted-foreground">Body:</span>
                           <span className={`font-semibold ${getConditionColor(vehicle.body)}`}>
-                            {vehicle.body.toFixed(0)} ({((vehicle.body / 1000) * 100).toFixed(0)}%)
+                            {vehicle.body.toFixed(0)} ({Math.floor((vehicle.body / 1000) * 100)}%)
                           </span>
                         </div>
                       </div>
