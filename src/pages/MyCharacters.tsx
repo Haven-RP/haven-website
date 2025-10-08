@@ -74,12 +74,9 @@ const MyCharacters = () => {
     }
   };
 
-  // Format last logged out timestamp to local timezone
+  // Format last logged out timestamp
   const formatLastLogout = (timestamp: string): string => {
-    // Handle timestamp format "2025-10-08T09:10:23" (no timezone indicator)
-    // If no 'Z' is present, assume UTC and add it
-    const normalizedTimestamp = timestamp.includes('Z') ? timestamp : `${timestamp}Z`;
-    const date = new Date(normalizedTimestamp);
+    const date = new Date(timestamp);
     
     // Format: "Jan 15, 2025 at 3:45 PM EST"
     return date.toLocaleString(undefined, {
@@ -152,7 +149,7 @@ const MyCharacters = () => {
                 <span className="text-neon-magenta">Characters</span>
               </h1>
               <p className="text-muted-foreground">
-                View and manage your FiveM characters
+                View and manage your Haven characters
               </p>
             </div>
 
