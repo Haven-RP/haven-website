@@ -52,11 +52,11 @@ const Store = () => {
             </Badge>
           )}
           {pkg.image && (
-            <div className="w-full h-48 mb-4 rounded-lg overflow-hidden bg-black/50">
+            <div className="w-full h-48 mb-4 rounded-lg overflow-hidden bg-black/50 flex items-center justify-center">
               <img
                 src={pkg.image}
                 alt={pkg.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
