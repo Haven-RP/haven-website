@@ -38,6 +38,9 @@ export const siteConfig = {
   medal: "https://medal.tv/games/gta-v/servers/2OzMbwRQJ6UhFJ/haven-rp-discordgg-havenrp",
   twitter: "",
   
+  // Tebex Store
+  tebexWebstoreIdentifier: "store.haven-rp.com", // Your Tebex webstore URL
+  
   // Meta
   metaTitle: "HavenRP — Serious FiveM Roleplay",
   metaDescription: "FiveM roleplay city with active staff, economy, factions, and community events.",

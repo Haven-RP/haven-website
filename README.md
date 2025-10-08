@@ -14,6 +14,7 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
 - **About** - Server story, values, and feature highlights
 - **Staff** - Team showcase with roles, bios, and avatars
 - **Join/Apply** - Server requirements and joining instructions
+- **Store** - Tebex integration with packages, categories, and checkout
 - **Wiki** - Embedded Notion documentation
 
 ### Authenticated Features
@@ -77,6 +78,9 @@ VITE_SUPABASE_KEY=your-supabase-anon-key
 # HavenRP API
 VITE_DISCORD_ROLES_API_URL=https://api.haven-rp.com/api/discord/roles
 VITE_HAVEN_API_KEY=your-havenrp-api-key
+
+# Tebex Store Configuration
+VITE_TEBEX_PUBLIC_TOKEN=your-tebex-public-token
 ```
 
 ### Supabase Setup
@@ -86,6 +90,16 @@ VITE_HAVEN_API_KEY=your-havenrp-api-key
 3. Add your Discord app credentials
 4. Set redirect URL to `https://yourdomain.com/`
 5. Add `VITE_HAVEN_API_KEY` to Supabase Secrets
+
+### Tebex Setup
+
+1. Get your Public Token from [Tebex Creator Dashboard](https://creator.tebex.io/)
+2. Navigate to **Integrations** → **API Keys**
+3. Create a **Public Token** (not Secret Key)
+4. Add to `.env.local` as `VITE_TEBEX_PUBLIC_TOKEN`
+5. Update `tebexWebstoreIdentifier` in `src/config/site.ts`
+
+See [TEBEX_SETUP.md](./TEBEX_SETUP.md) for detailed instructions.
 
 ## 📁 Project Structure
 
@@ -102,6 +116,7 @@ haven-website/
 │   │   ├── Index.tsx       # Homepage
 │   │   ├── Dashboard.tsx   # Member dashboard
 │   │   ├── MyCharacters.tsx # FiveM characters
+│   │   ├── Store.tsx       # Tebex store
 │   │   └── ...
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useDiscordRoles.ts
@@ -111,6 +126,7 @@ haven-website/
 │   │   ├── useFivemVehicleInventory.ts
 │   │   ├── useFivemStats.ts
 │   │   ├── useDiscordStats.ts
+│   │   ├── useTebex.ts     # Tebex API integration
 │   │   └── ...
 │   ├── config/             # Site configuration
 │   │   └── site.ts         # Centralized config
@@ -185,6 +201,15 @@ GET https://servers-frontend.fivem.net/api/servers/single/{serverCode}
 ### Discord Widget API
 ```
 GET https://discord.com/api/guilds/{guildId}/widget.json
+```
+
+### Tebex Headless API
+```
+GET https://plugin.tebex.io/information
+GET https://plugin.tebex.io/categories
+GET https://plugin.tebex.io/categories/{categoryId}
+GET https://plugin.tebex.io/packages/{packageId}
+Headers: X-Tebex-Public-Token: {VITE_TEBEX_PUBLIC_TOKEN}
 ```
 
 ## 📜 Available Scripts
