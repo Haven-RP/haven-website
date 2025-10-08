@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import pageBg from "@/assets/page-bg.png";
-import { Loader2, User as UserIcon, Phone, DollarSign, CreditCard, Coins, Package, Heart, Shield, Copy, Check } from "lucide-react";
+import { Loader2, User as UserIcon, Phone, DollarSign, CreditCard, Coins, Package, Heart, Shield, Copy, Check, Car } from "lucide-react";
 import { useFivemCharacters } from "@/hooks/useFivemCharacters";
 import { CharacterInventoryModal } from "@/components/CharacterInventoryModal";
+import { CharacterVehiclesModal } from "@/components/CharacterVehiclesModal";
 import { useToast } from "@/hooks/use-toast";
 
 const MyCharacters = () => {
@@ -20,6 +21,10 @@ const MyCharacters = () => {
   const [loading, setLoading] = useState(true);
   const [discordUserId, setDiscordUserId] = useState<string | null>(null);
   const [selectedCharacter, setSelectedCharacter] = useState<{
+    citizenid: string;
+    name: string;
+  } | null>(null);
+  const [selectedCharacterVehicles, setSelectedCharacterVehicles] = useState<{
     citizenid: string;
     name: string;
   } | null>(null);
@@ -260,19 +265,33 @@ const MyCharacters = () => {
                         )}
                       </div>
 
-                      {/* Action Button */}
-                      <Button
-                        className="w-full bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
-                        onClick={() =>
-                          setSelectedCharacter({
-                            citizenid: character.citizenid,
-                            name: `${character.charinfoData.firstname} ${character.charinfoData.lastname}`,
-                          })
-                        }
-                      >
-                        <Package className="w-4 h-4 mr-2" />
-                        Show Inventory
-                      </Button>
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
+                          onClick={() =>
+                            setSelectedCharacter({
+                              citizenid: character.citizenid,
+                              name: `${character.charinfoData.firstname} ${character.charinfoData.lastname}`,
+                            })
+                          }
+                        >
+                          <Package className="w-4 h-4 mr-2" />
+                          Inventory
+                        </Button>
+                        <Button
+                          className="bg-gradient-purple-blue hover:shadow-neon-purple transition-all duration-300"
+                          onClick={() =>
+                            setSelectedCharacterVehicles({
+                              citizenid: character.citizenid,
+                              name: `${character.charinfoData.firstname} ${character.charinfoData.lastname}`,
+                            })
+                          }
+                        >
+                          <Car className="w-4 h-4 mr-2" />
+                          Vehicles
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -303,6 +322,16 @@ const MyCharacters = () => {
           onOpenChange={(open) => !open && setSelectedCharacter(null)}
           citizenid={selectedCharacter.citizenid}
           characterName={selectedCharacter.name}
+        />
+      )}
+
+      {/* Vehicles Modal */}
+      {selectedCharacterVehicles && (
+        <CharacterVehiclesModal
+          open={!!selectedCharacterVehicles}
+          onOpenChange={(open) => !open && setSelectedCharacterVehicles(null)}
+          citizenid={selectedCharacterVehicles.citizenid}
+          characterName={selectedCharacterVehicles.name}
         />
       )}
     </div>
