@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useFivemVehicles } from "@/hooks/useFivemVehicles";
-import { Loader2, Car, Fuel, Wrench, Heart, Star, Package, Copy, Check } from "lucide-react";
+import { Loader2, Car, Fuel, Wrench, Heart, Star, Package, Copy, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -86,6 +86,30 @@ export const CharacterVehiclesModal = ({
     }
   };
 
+  const getDealershipBadge = (dealership: string | null) => {
+    if (!dealership || dealership === 'null') return null;
+    
+    if (dealership === '1of1') {
+      return (
+        <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 border-yellow-500/50 flex items-center gap-1">
+          <Sparkles className="w-3 h-3" />
+          1 of 1
+        </Badge>
+      );
+    }
+    
+    if (dealership === 'import') {
+      return (
+        <Badge className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-400 border-blue-500/50 flex items-center gap-1">
+          <Sparkles className="w-3 h-3" />
+          Import
+        </Badge>
+      );
+    }
+    
+    return null;
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,15 +146,15 @@ export const CharacterVehiclesModal = ({
                       key={index}
                       className="bg-black/40 border border-white/10 rounded-lg p-5 hover:border-primary/30 transition-all duration-300"
                     >
-                      {/* Header with Favorite */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                      {/* Header with Favorite and Dealership */}
+                      <div className="flex items-start justify-between mb-4 gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="text-xl font-heading font-bold text-foreground">
                               {vehicle.brand} {vehicle.model}
                             </h3>
                             {vehicle.favourite === 1 && (
-                              <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                              <Star className="w-5 h-5 text-yellow-500 fill-yellow-500 flex-shrink-0" />
                             )}
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
@@ -154,6 +178,12 @@ export const CharacterVehiclesModal = ({
                             </Badge>
                           </div>
                         </div>
+                        {/* Dealership Badge */}
+                        {getDealershipBadge(vehicle.dealership) && (
+                          <div className="flex-shrink-0">
+                            {getDealershipBadge(vehicle.dealership)}
+                          </div>
+                        )}
                       </div>
 
                       {/* Stats */}

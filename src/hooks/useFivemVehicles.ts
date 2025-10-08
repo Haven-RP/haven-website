@@ -13,6 +13,7 @@ export interface FivemVehicle {
   brand: string;
   model: string;
   category: string;
+  dealership: string | null;
 }
 
 interface VehiclesResponse {
