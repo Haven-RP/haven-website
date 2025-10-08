@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { siteConfig } from "@/config/site";
 
-// Call Tebex store API directly from frontend
-// The API is public and Cloudflare allows browser requests
-const STORE_URL = `https://${siteConfig.tebexWebstoreIdentifier}`;
+// Tebex Headless API base URL
+const TEBEX_API_BASE = "https://plugin.tebex.io";
+const PROJECT_ID = siteConfig.tebexProjectId;
 
 export interface TebexCategory {
   id: number;
@@ -73,7 +73,7 @@ export const useTebexWebstore = () => {
   return useQuery<TebexWebstore, Error>({
     queryKey: ["tebex-webstore"],
     queryFn: async () => {
-      const response = await fetch(`${STORE_URL}/api/information`);
+      const response = await fetch(`${TEBEX_API_BASE}/webstore/${PROJECT_ID}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch webstore info: ${response.status}`);
@@ -91,7 +91,7 @@ export const useTebexCategories = () => {
   return useQuery<TebexCategory[], Error>({
     queryKey: ["tebex-categories"],
     queryFn: async () => {
-      const response = await fetch(`${STORE_URL}/api/categories`);
+      const response = await fetch(`${TEBEX_API_BASE}/categories?webstoreId=${PROJECT_ID}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch categories: ${response.status}`);
@@ -113,7 +113,7 @@ export const useTebexCategoryPackages = (categoryId: number | null) => {
         throw new Error("No category ID provided");
       }
 
-      const response = await fetch(`${STORE_URL}/api/categories/${categoryId}`);
+      const response = await fetch(`${TEBEX_API_BASE}/categories/${categoryId}?webstoreId=${PROJECT_ID}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch category packages: ${response.status}`);
@@ -136,7 +136,7 @@ export const useTebexPackage = (packageId: number | null) => {
         throw new Error("No package ID provided");
       }
 
-      const response = await fetch(`${STORE_URL}/api/packages/${packageId}`);
+      const response = await fetch(`${TEBEX_API_BASE}/packages/${packageId}?webstoreId=${PROJECT_ID}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch package: ${response.status}`);
