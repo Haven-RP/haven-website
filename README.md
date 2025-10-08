@@ -79,8 +79,7 @@ VITE_SUPABASE_KEY=your-supabase-anon-key
 VITE_DISCORD_ROLES_API_URL=https://api.haven-rp.com/api/discord/roles
 VITE_HAVEN_API_KEY=your-havenrp-api-key
 
-# Tebex Store Configuration (Webstore Identifier)
-TEBEX_SECRET_KEY=your-store-identifier
+# No Tebex environment variables needed - configure in src/config/site.ts
 ```
 
 ### Supabase Setup
@@ -94,12 +93,9 @@ TEBEX_SECRET_KEY=your-store-identifier
 ### Tebex Setup
 
 1. Find your webstore URL (e.g., `havenrp.tebex.io`)
-2. Extract the identifier (the part before `.tebex.io`)
-3. Add to Vercel environment variables as `TEBEX_SECRET_KEY` = `your-identifier`
-4. Add to `.env.local` as `TEBEX_SECRET_KEY` for local development
-5. Update `tebexWebstoreIdentifier` in `src/config/site.ts` with full URL
+2. Update `tebexWebstoreIdentifier` in `src/config/site.ts`
 
-ℹ️ **Note:** The Headless API uses your public webstore identifier, not a secret key.
+ℹ️ **Note:** No API keys needed - the store API is public and called directly from the browser.
 
 See [TEBEX_SETUP.md](./TEBEX_SETUP.md) for detailed instructions.
 
@@ -212,7 +208,7 @@ GET https://{identifier}.tebex.io/api/categories
 GET https://{identifier}.tebex.io/api/packages/{id}
 ```
 
-**Note:** API calls are proxied server-side via Vercel functions at `/api/tebex/*`
+**Note:** API calls are made directly from the browser (no proxy needed)
 
 ## 📜 Available Scripts
 

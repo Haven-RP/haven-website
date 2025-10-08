@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { siteConfig } from "@/config/site";
 
-// Use our Vercel API routes instead of calling Tebex directly (to avoid CORS issues)
-const API_BASE_URL = import.meta.env.PROD 
-  ? "/api/tebex" // Production: use relative path
-  : "http://localhost:8080/api/tebex"; // Development: adjust port if needed
+// Call Tebex store API directly from frontend
+// The API is public and Cloudflare allows browser requests
+const STORE_URL = `https://${siteConfig.tebexWebstoreIdentifier}`;
 
 export interface TebexCategory {
   id: number;
@@ -73,11 +73,10 @@ export const useTebexWebstore = () => {
   return useQuery<TebexWebstore, Error>({
     queryKey: ["tebex-webstore"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/information`);
+      const response = await fetch(`${STORE_URL}/api/information`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch webstore info: ${response.status}`);
+        throw new Error(`Failed to fetch webstore info: ${response.status}`);
       }
 
       return response.json();
@@ -92,11 +91,10 @@ export const useTebexCategories = () => {
   return useQuery<TebexCategory[], Error>({
     queryKey: ["tebex-categories"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/categories`);
+      const response = await fetch(`${STORE_URL}/api/categories`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch categories: ${response.status}`);
+        throw new Error(`Failed to fetch categories: ${response.status}`);
       }
 
       return response.json();
@@ -115,11 +113,10 @@ export const useTebexCategoryPackages = (categoryId: number | null) => {
         throw new Error("No category ID provided");
       }
 
-      const response = await fetch(`${API_BASE_URL}/category/${categoryId}`);
+      const response = await fetch(`${STORE_URL}/api/categories/${categoryId}`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch category packages: ${response.status}`);
+        throw new Error(`Failed to fetch category packages: ${response.status}`);
       }
 
       return response.json();
@@ -139,11 +136,10 @@ export const useTebexPackage = (packageId: number | null) => {
         throw new Error("No package ID provided");
       }
 
-      const response = await fetch(`${API_BASE_URL}/package/${packageId}`);
+      const response = await fetch(`${STORE_URL}/api/packages/${packageId}`);
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `Failed to fetch package: ${response.status}`);
+        throw new Error(`Failed to fetch package: ${response.status}`);
       }
 
       return response.json();

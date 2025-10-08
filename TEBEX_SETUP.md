@@ -7,46 +7,7 @@ This guide will help you configure the HavenRP store with Tebex Headless API.
 1. A Tebex account with a configured webstore
 2. Products and categories set up in your Tebex dashboard
 
-## Step 1: Get Your Tebex Webstore Identifier
-
-⚠️ **Important:** The Headless API uses your **Webstore Identifier** (not a secret key).
-
-1. Go to [Tebex Creator Dashboard](https://creator.tebex.io/)
-2. Look at your webstore URL - it's in the format: `your-store.tebex.io`
-3. The **identifier** is the part before `.tebex.io` (e.g., `havenrp`)
-4. This identifier is used in API calls and is public-facing
-
-**Note:** The webstore identifier is public and safe to use. There's no secret key needed for the Headless API - it only allows reading public store information.
-
-## Step 2: Configure Environment Variables
-
-### Local Development
-Add to your `.env.local` file:
-
-```env
-TEBEX_SECRET_KEY=your-store-identifier
-```
-
-Example: If your store is `havenrp.tebex.io`, use `havenrp`.
-
-### Vercel Deployment
-Add the environment variable in Vercel:
-
-1. Go to your project in Vercel dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Click **Add New**
-4. Add the variable:
-   - **Name:** `TEBEX_SECRET_KEY`
-   - **Value:** Your webstore identifier (e.g., `havenrp`)
-   - **Environments:** Check all three boxes (Production, Preview, Development)
-5. Click **Save**
-6. **Important:** Redeploy your project:
-   - Go to **Deployments** tab
-   - Click the three dots (...) on latest deployment
-   - Select **Redeploy**
-   - OR push a new commit to trigger automatic redeployment
-
-## Step 3: Update Site Configuration
+## Step 1: Update Site Configuration
 
 In `src/config/site.ts`, update the Tebex webstore identifier:
 
@@ -55,7 +16,9 @@ In `src/config/site.ts`, update the Tebex webstore identifier:
 tebexWebstoreIdentifier: "your-store.tebex.io",
 ```
 
-Replace `your-store.tebex.io` with your actual Tebex webstore URL.
+Replace `havenrp.tebex.io` with your actual Tebex webstore URL.
+
+**That's it!** No environment variables needed - the store API is public and called directly from the browser.
 
 ## Step 4: Configure Your Tebex Store
 
@@ -84,21 +47,14 @@ givemoney {player} 1000000
 
 ## Architecture
 
-### Backend Proxy (Vercel Serverless Functions)
-Tebex API calls are proxied through Vercel serverless functions:
+### Frontend Direct API Calls
 
-- `api/tebex/information.ts` - Fetches `https://{store}.tebex.io/api/information`
-- `api/tebex/categories.ts` - Fetches `https://{store}.tebex.io/api/categories`
-- `api/tebex/category/[id].ts` - Fetches `https://{store}.tebex.io/api/categories/{id}`
-- `api/tebex/package/[id].ts` - Fetches `https://{store}.tebex.io/api/packages/{id}`
+The frontend (`src/hooks/useTebex.ts`) calls the Tebex store API directly:
 
-### Frontend (`src/hooks/useTebex.ts`)
-React hooks call the backend API routes:
-
-- `useTebexWebstore()` - Fetches store information
-- `useTebexCategories()` - Gets all categories
-- `useTebexCategoryPackages(id)` - Fetches packages for category
-- `useTebexPackage(id)` - Gets single package
+- `useTebexWebstore()` - Fetches `https://{store}.tebex.io/api/information`
+- `useTebexCategories()` - Fetches `https://{store}.tebex.io/api/categories`
+- `useTebexCategoryPackages(id)` - Fetches `https://{store}.tebex.io/api/categories/{id}`
+- `useTebexPackage(id)` - Fetches `https://{store}.tebex.io/api/packages/{id}`
 
 ## Features Included
 
@@ -112,18 +68,18 @@ React hooks call the backend API routes:
 - ✅ Currency display from your Tebex account
 - ✅ Loading states and error handling
 - ✅ Disabled packages shown but not purchasable
-- ✅ Response caching (5-10 minutes)
+- ✅ Browser-side caching (5-10 minutes)
 
 ### 📦 API Flow
 ```
-Frontend → Vercel API Routes → Tebex Store API → Response
+Frontend → Tebex Store Public API → Response
 ```
 
-This architecture ensures:
-- Clean API proxying
-- Response caching
-- Better error handling
-- Consistent data flow
+This architecture:
+- No backend needed - direct browser calls
+- Cloudflare allows legitimate browser requests
+- Public API is safe and read-only
+- TanStack Query handles caching
 
 ## Checkout Flow
 
@@ -201,10 +157,10 @@ Navigate to: `http://localhost:8080/store`
 ## Security Notes
 
 ℹ️ **Note:**
-- **Webstore Identifier** is public and safe (part of your store URL)
-- Headless API only provides read access to public store data
-- No sensitive keys are exposed
-- API calls are still proxied through backend for consistency
+- **Webstore URL** is public and safe
+- Store API only provides read access to public store data
+- No API keys or secrets needed
+- All calls are made directly from the browser
 - Users can't modify store data, only view and checkout
 
 ## Support
