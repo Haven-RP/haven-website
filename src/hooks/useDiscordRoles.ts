@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const DISCORD_ROLES_API_URL = import.meta.env.VITE_DISCORD_ROLES_API_URL || "http://192.99.168.114:8080/api/discord/roles";
+const DISCORD_ROLES_API_URL = import.meta.env.VITE_DISCORD_ROLES_API_URL || "https://api.haven-rp.com/api/discord/roles";
 const DISCORD_API_KEY = import.meta.env.VITE_HAVEN_API_KEY || "";
 
 interface DiscordRole {
