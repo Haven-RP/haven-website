@@ -18,20 +18,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Try both with and without VITE_ prefix
-  const token = process.env.TEBEX_PUBLIC_TOKEN || process.env.VITE_TEBEX_PUBLIC_TOKEN;
+  // Use Secret Key (not Public Token) for Headless API
+  const secretKey = process.env.TEBEX_SECRET_KEY || process.env.VITE_TEBEX_SECRET_KEY;
 
-  if (!token) {
+  if (!secretKey) {
     console.error('Environment variables:', Object.keys(process.env).filter(k => k.includes('TEBEX')));
     return res.status(500).json({ 
-      error: 'Tebex token not configured. Please set TEBEX_PUBLIC_TOKEN or VITE_TEBEX_PUBLIC_TOKEN in Vercel environment variables.' 
+      error: 'Tebex secret key not configured. Please set TEBEX_SECRET_KEY in Vercel environment variables.' 
     });
   }
 
   try {
     const response = await fetch(`${TEBEX_BASE_URL}/information`, {
       headers: {
-        'X-Tebex-Public-Token': token,
+        'X-Tebex-Secret': secretKey,
       },
     });
 

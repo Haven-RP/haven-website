@@ -7,12 +7,16 @@ This guide will help you configure the HavenRP store with Tebex Headless API.
 1. A Tebex account with a configured webstore
 2. Products and categories set up in your Tebex dashboard
 
-## Step 1: Get Your Tebex Public Token
+## Step 1: Get Your Tebex Secret Key
+
+⚠️ **Important:** The Headless API requires your **Secret Key**, not the Public Token.
 
 1. Go to [Tebex Creator Dashboard](https://creator.tebex.io/)
 2. Navigate to **Integrations** → **API Keys**
-3. Create a new **Public Token** (not Secret Key)
-4. Copy the token - it should look like: `xxxx-xxxxxxxxxxxxxxxx`
+3. Find or create your **Secret Key** (the one that starts with `sk-`)
+4. Copy the secret key - it should look like: `sk-xxxxxxxxxxxxxxxx`
+
+**Security Note:** This key has full access to your store. Never commit it to git or expose it on the frontend. Our serverless architecture keeps it secure on the backend only.
 
 ## Step 2: Configure Environment Variables
 
@@ -20,27 +24,27 @@ This guide will help you configure the HavenRP store with Tebex Headless API.
 Add to your `.env.local` file:
 
 ```env
-VITE_TEBEX_PUBLIC_TOKEN=your-tebex-public-token-here
+TEBEX_SECRET_KEY=sk-your-secret-key-here
 ```
+
+⚠️ **Never commit `.env.local` to git!** This file should be in your `.gitignore`.
 
 ### Vercel Deployment
 Add the environment variable in Vercel:
 
 1. Go to your project in Vercel dashboard
 2. Navigate to **Settings** → **Environment Variables**
-3. Add **TWO** variables (serverless functions will try both):
-   - Name: `TEBEX_PUBLIC_TOKEN` (preferred for serverless)
-   - Value: your-tebex-public-token
-   - Environments: Production, Preview, Development
-   
-   AND
-   
-   - Name: `VITE_TEBEX_PUBLIC_TOKEN` (for Vite client if needed)
-   - Value: your-tebex-public-token  
-   - Environments: Production, Preview, Development
-4. Click **Save** for each
-5. **Important:** Go to **Deployments** and click "Redeploy" on the latest deployment
-   - Or push a new commit to trigger redeployment
+3. Click **Add New**
+4. Add the variable:
+   - **Name:** `TEBEX_SECRET_KEY`
+   - **Value:** `sk-your-secret-key-here` (paste your actual secret key)
+   - **Environments:** Check all three boxes (Production, Preview, Development)
+5. Click **Save**
+6. **Important:** Redeploy your project:
+   - Go to **Deployments** tab
+   - Click the three dots (...) on latest deployment
+   - Select **Redeploy**
+   - OR push a new commit to trigger automatic redeployment
 
 ## Step 3: Update Site Configuration
 
@@ -160,10 +164,11 @@ For special package types, add badges in the `renderPackage` function:
 
 ## Troubleshooting
 
-### "Error loading store"
-- Check if `VITE_TEBEX_PUBLIC_TOKEN` is set correctly
-- Verify you're using the **Public Token**, not Secret Key
-- Check browser console for detailed error messages
+### "Error loading store" or 403 errors
+- Check if `TEBEX_SECRET_KEY` is set correctly in Vercel
+- Verify you're using the **Secret Key** (starts with `sk-`), not Public Token
+- Make sure you redeployed after adding the environment variable
+- Check Vercel function logs for detailed error messages
 
 ### Packages not showing
 - Ensure packages are assigned to categories
@@ -196,13 +201,14 @@ Navigate to: `http://localhost:8080/store`
 
 ## Security Notes
 
-⚠️ **Important:**
-- **Public Token** is stored server-side in Vercel
-- **Never** commit `.env.local` to git
-- **Never** use Secret Key anywhere
-- Public Token can only **read** data, not modify
+⚠️ **Critical:**
+- **Secret Key** has full access to your Tebex store
+- **Only** stored server-side in Vercel serverless functions
+- **Never** commit to git or expose on frontend
+- **Never** use in client-side code
 - All API calls are proxied through secure backend
-- Frontend never directly contacts Tebex API
+- Frontend never has access to the secret key
+- This architecture is why we use serverless functions
 
 ## Support
 

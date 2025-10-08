@@ -79,8 +79,8 @@ VITE_SUPABASE_KEY=your-supabase-anon-key
 VITE_DISCORD_ROLES_API_URL=https://api.haven-rp.com/api/discord/roles
 VITE_HAVEN_API_KEY=your-havenrp-api-key
 
-# Tebex Store Configuration
-VITE_TEBEX_PUBLIC_TOKEN=your-tebex-public-token
+# Tebex Store Configuration (Secret Key for backend API)
+TEBEX_SECRET_KEY=sk-your-secret-key-here
 ```
 
 ### Supabase Setup
@@ -93,11 +93,14 @@ VITE_TEBEX_PUBLIC_TOKEN=your-tebex-public-token
 
 ### Tebex Setup
 
-1. Get your Public Token from [Tebex Creator Dashboard](https://creator.tebex.io/)
+1. Get your **Secret Key** from [Tebex Creator Dashboard](https://creator.tebex.io/)
 2. Navigate to **Integrations** → **API Keys**
-3. Create a **Public Token** (not Secret Key)
-4. Add to `.env.local` as `VITE_TEBEX_PUBLIC_TOKEN`
-5. Update `tebexWebstoreIdentifier` in `src/config/site.ts`
+3. Copy your **Secret Key** (starts with `sk-`)
+4. Add to Vercel environment variables as `TEBEX_SECRET_KEY`
+5. Add to `.env.local` as `TEBEX_SECRET_KEY` for local development
+6. Update `tebexWebstoreIdentifier` in `src/config/site.ts`
+
+⚠️ **Important:** Use Secret Key (not Public Token) for the Headless API.
 
 See [TEBEX_SETUP.md](./TEBEX_SETUP.md) for detailed instructions.
 
@@ -209,8 +212,10 @@ GET https://plugin.tebex.io/information
 GET https://plugin.tebex.io/categories
 GET https://plugin.tebex.io/categories/{categoryId}
 GET https://plugin.tebex.io/packages/{packageId}
-Headers: X-Tebex-Public-Token: {VITE_TEBEX_PUBLIC_TOKEN}
+Headers: X-Tebex-Secret: {TEBEX_SECRET_KEY}
 ```
+
+**Note:** Direct API calls are made server-side via Vercel functions at `/api/tebex/*`
 
 ## 📜 Available Scripts
 
