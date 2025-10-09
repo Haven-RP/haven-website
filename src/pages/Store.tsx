@@ -16,6 +16,7 @@ const Store = () => {
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useTebexCategories();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [purchasingPackage, setPurchasingPackage] = useState<number | null>(null);
+  const [tebexLoaded, setTebexLoaded] = useState(false);
   const { toast } = useToast();
 
   // Set first category as default when categories load
@@ -26,9 +27,39 @@ const Store = () => {
     }
   }
 
+  // Check if Tebex.js is loaded
+  useEffect(() => {
+    const checkTebexLoaded = () => {
+      if (typeof window !== 'undefined' && window.Tebex) {
+        console.log('Tebex.js loaded successfully');
+        setTebexLoaded(true);
+        return true;
+      }
+      return false;
+    };
+
+    // Check immediately
+    if (checkTebexLoaded()) return;
+
+    // If not loaded, check every 100ms for up to 5 seconds
+    let attempts = 0;
+    const maxAttempts = 50;
+    const interval = setInterval(() => {
+      attempts++;
+      if (checkTebexLoaded()) {
+        clearInterval(interval);
+      } else if (attempts >= maxAttempts) {
+        console.error('Tebex.js failed to load after 5 seconds');
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Initialize Tebex.js event listeners
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.Tebex) {
+    if (tebexLoaded && typeof window !== 'undefined' && window.Tebex) {
       // Listen for checkout completion
       window.Tebex.checkout.on('checkout:complete', (data) => {
         console.log('Checkout complete:', data);
@@ -67,14 +98,15 @@ const Store = () => {
         window.Tebex.checkout.off('checkout:error');
       }
     };
-  }, [toast]);
+  }, [tebexLoaded, toast]);
 
   const handlePurchase = async (packageId: number, packageName: string) => {
     // Check if Tebex.js is loaded
-    if (typeof window === 'undefined' || !window.Tebex) {
+    if (!tebexLoaded || typeof window === 'undefined' || !window.Tebex) {
+      console.error('Tebex.js not loaded. tebexLoaded:', tebexLoaded, 'window.Tebex:', typeof window !== 'undefined' ? !!window.Tebex : 'undefined');
       toast({
         title: "Checkout Unavailable",
-        description: "Please refresh the page and try again.",
+        description: "Tebex checkout is still loading. Please wait a moment and try again.",
         variant: "destructive",
         duration: 3000,
       });
@@ -189,12 +221,17 @@ const Store = () => {
           <Button
             className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
             onClick={() => handlePurchase(pkg.id, pkg.name)}
-            disabled={pkg.disable_quantity || purchasingPackage === pkg.id}
+            disabled={pkg.disable_quantity || purchasingPackage === pkg.id || !tebexLoaded}
           >
             {purchasingPackage === pkg.id ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Loading...
+              </>
+            ) : !tebexLoaded ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Initializing...
               </>
             ) : (
               <>
