@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ShoppingCart, Tag, ExternalLink, Sparkles } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
-import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasketWithPackage } from "@/hooks/useTebex";
+import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasket, addPackageToBasket } from "@/hooks/useTebex";
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import Tebex from "@tebexio/tebex.js";
@@ -79,13 +79,18 @@ const Store = () => {
     setPurchasingPackage(packageId);
 
     try {
-      // Create basket with package included
-      console.log('Creating basket with package:', packageId);
-      const basket = await createBasketWithPackage(packageId, 1);
+      // Step 1: Create empty basket
+      console.log('Step 1: Creating empty basket...');
+      const emptyBasket = await createBasket();
+      console.log('Empty basket created:', emptyBasket.ident);
       
-      console.log('Basket created:', basket.ident);
+      // Step 2: Add package to basket
+      console.log('Step 2: Adding package', packageId, 'to basket...');
+      const basket = await addPackageToBasket(emptyBasket.ident, packageId, 1);
+      console.log('Package added, final basket:', basket);
       
-      // Initialize and launch embedded checkout
+      // Step 3: Initialize and launch embedded checkout
+      console.log('Step 3: Launching checkout...');
       Tebex.checkout.init({
         ident: basket.ident,
         theme: 'dark',
@@ -97,7 +102,6 @@ const Store = () => {
         ],
       });
 
-      console.log('Launching checkout...');
       Tebex.checkout.launch();
       
     } catch (error) {
@@ -352,14 +356,14 @@ const Store = () => {
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Visit Full Webstore
                 </a>
-              </Button>
-            </div>
-          </div>
+                                  </Button>
+                                </div>
+                              </div>
         </main>
 
         <Footer />
       </div>
-    </div>
+      </div>
   );
 };
 

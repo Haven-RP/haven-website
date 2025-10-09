@@ -133,6 +133,14 @@ export const addPackageToBasket = async (
   packageId: number,
   quantity: number = 1
 ): Promise<TebexBasket> => {
+  const requestBody = {
+    package: packageId,
+    quantity: quantity,
+    type: 'single',
+  };
+
+  console.log('Adding package to basket:', basketIdent, JSON.stringify(requestBody, null, 2));
+
   const response = await fetch(
     `${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets/${basketIdent}/packages`,
     {
@@ -140,12 +148,11 @@ export const addPackageToBasket = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        package: packageId,
-        quantity: quantity,
-      }),
+      body: JSON.stringify(requestBody),
     }
   );
+
+  console.log('Add package response status:', response.status);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -154,6 +161,7 @@ export const addPackageToBasket = async (
   }
 
   const result = await response.json();
+  console.log('Package added, basket response:', result);
   return result.data;
 };
 
