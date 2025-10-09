@@ -71,21 +71,26 @@ export const createBasketWithPackage = async (
   packageId: number,
   quantity: number = 1
 ): Promise<TebexBasket> => {
+  const requestBody = {
+    complete_url: `${window.location.origin}/store?success=true`,
+    cancel_url: `${window.location.origin}/store`,
+    packages: [
+      {
+        package: packageId,
+        quantity: quantity,
+        type: 'single',
+      },
+    ],
+  };
+
+  console.log('Creating basket with request:', JSON.stringify(requestBody, null, 2));
+
   const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      complete_url: `${window.location.origin}/store?success=true`,
-      cancel_url: `${window.location.origin}/store`,
-      packages: [
-        {
-          package_id: packageId,
-          quantity: quantity,
-        },
-      ],
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -95,6 +100,7 @@ export const createBasketWithPackage = async (
   }
 
   const result = await response.json();
+  console.log('Basket created response:', result);
   return result.data;
 };
 
