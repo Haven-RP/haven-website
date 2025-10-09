@@ -66,7 +66,39 @@ export interface TebexBasket {
   currency: string;
 }
 
-// Create a new basket
+// Create a new basket with a package
+export const createBasketWithPackage = async (
+  packageId: number,
+  quantity: number = 1
+): Promise<TebexBasket> => {
+  const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      complete_url: `${window.location.origin}/store?success=true`,
+      cancel_url: `${window.location.origin}/store`,
+      packages: [
+        {
+          package_id: packageId,
+          quantity: quantity,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Create basket error response:', errorText);
+    throw new Error(`Failed to create basket: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  return result.data;
+};
+
+// Create a new empty basket (for adding packages later)
 export const createBasket = async (): Promise<TebexBasket> => {
   const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets`, {
     method: 'POST',
@@ -80,7 +112,9 @@ export const createBasket = async (): Promise<TebexBasket> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create basket: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Create basket error response:', errorText);
+    throw new Error(`Failed to create basket: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();
@@ -101,15 +135,16 @@ export const addPackageToBasket = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        package_id: packageId,
+        package: packageId,
         quantity: quantity,
-        type: 'single',
       }),
     }
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to add package to basket: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Add package error response:', errorText);
+    throw new Error(`Failed to add package to basket: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();

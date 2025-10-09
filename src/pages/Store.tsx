@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ShoppingCart, Tag, ExternalLink, Sparkles } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
-import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasket, addPackageToBasket } from "@/hooks/useTebex";
+import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasketWithPackage } from "@/hooks/useTebex";
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import Tebex from "@tebexio/tebex.js";
@@ -79,14 +79,13 @@ const Store = () => {
     setPurchasingPackage(packageId);
 
     try {
-      // Create a new basket
-      const basket = await createBasket();
+      // Create basket with package included
+      console.log('Creating basket with package:', packageId);
+      const basket = await createBasketWithPackage(packageId, 1);
       
-      // Add package to basket
-      await addPackageToBasket(basket.ident, packageId, 1);
+      console.log('Basket created:', basket.ident);
       
       // Initialize and launch embedded checkout
-      console.log('Launching embedded checkout with basket:', basket.ident);
       Tebex.checkout.init({
         ident: basket.ident,
         theme: 'dark',
@@ -98,13 +97,14 @@ const Store = () => {
         ],
       });
 
+      console.log('Launching checkout...');
       Tebex.checkout.launch();
       
     } catch (error) {
       console.error('Error initiating checkout:', error);
       toast({
         title: "Checkout Error",
-        description: "Failed to start checkout. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to start checkout. Please try again.",
         variant: "destructive",
         duration: 3000,
       });
