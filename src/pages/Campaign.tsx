@@ -41,6 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDiscordRoles } from "@/hooks/useDiscordRoles";
+import { siteConfig } from "@/config/site";
 
 const Campaign = () => {
   const navigate = useNavigate();
@@ -55,9 +56,9 @@ const Campaign = () => {
   // Fetch user's Discord roles
   const { data: rolesData } = useDiscordRoles(discordUserId);
 
-  // Check if user is Senior Admin
+  // Check if user is Senior Admin (by role ID)
   const isSeniorAdmin = rolesData?.data?.roles?.some(
-    (role) => role.name === "Senior Admin"
+    (role) => role.id === siteConfig.seniorAdminRoleId
   ) ?? false;
 
   // Fetch campaigns

@@ -41,6 +41,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useDiscordRoles } from "@/hooks/useDiscordRoles";
+import { siteConfig } from "@/config/site";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,9 +71,9 @@ const CampaignAdmin = () => {
   // Fetch user's Discord roles
   const { data: rolesData, isLoading: rolesLoading } = useDiscordRoles(discordUserId);
 
-  // Check if user is Senior Admin
+  // Check if user is Senior Admin (by role ID)
   const isSeniorAdmin = rolesData?.data?.roles?.some(
-    (role) => role.name === "Senior Admin"
+    (role) => role.id === siteConfig.seniorAdminRoleId
   ) ?? false;
 
   // Fetch campaigns

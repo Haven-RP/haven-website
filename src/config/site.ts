@@ -21,6 +21,7 @@ export const siteConfig = {
   // Discord
   discordInvite: "https://discord.gg/havenrp",
   discordGuildId: "1381585365466611732", // For widget API
+  seniorAdminRoleId: "1414073546216308799", // Discord role ID for Senior Admin
   
   // AppyBot Application
   appyChannelUrl: "https://discord.com/channels/1381585365466611732/1381735980360274060",
