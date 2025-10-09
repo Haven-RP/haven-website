@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import Wiki from "./pages/Wiki";
 import MyCharacters from "./pages/MyCharacters";
 import Store from "./pages/Store";
+import Campaign from "./pages/Campaign";
+import CampaignAdmin from "./pages/CampaignAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-characters" element={<MyCharacters />} />
           <Route path="/store" element={<Store />} />
+          <Route path="/campaigns" element={<Campaign />} />
+          <Route path="/campaigns/admin" element={<CampaignAdmin />} />
           <Route path="/wiki" element={<Wiki />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

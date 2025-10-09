@@ -29,6 +29,7 @@ export const Navigation = () => {
     { name: "Join", path: "/join" },
     { name: "About", path: "/about" },
     { name: "Staff", path: "/staff" },
+    { name: "Campaigns", path: "/campaigns" },
     { name: "Store", path: "/store" },
     { name: "Merch", path: "https://merch.haven-rp.com/", external: true },
   ];
