@@ -134,19 +134,19 @@ export const addPackageToBasket = async (
   quantity: number = 1
 ): Promise<TebexBasket> => {
   const requestBody = {
-    package: packageId,
+    package_id: packageId,
     quantity: quantity,
-    type: 'single',
   };
 
   console.log('Adding package to basket:', basketIdent, JSON.stringify(requestBody, null, 2));
 
   const response = await fetch(
-    `${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets/${basketIdent}/packages`,
+    `${HEADLESS_API_BASE}/baskets/${basketIdent}/packages`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': '*/*',
       },
       body: JSON.stringify(requestBody),
     }
