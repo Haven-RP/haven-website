@@ -123,11 +123,50 @@ Each package card shows:
 
 ## Checkout Flow
 
-When a user clicks "Purchase":
+### Embedded Checkout with Tebex.js
 
-1. Opens checkout at `https://store.haven-rp.com/package/{id}` (or your domain)
-2. User completes payment on Tebex's secure checkout
-3. Commands are executed on your FiveM server automatically (if configured)
+The store uses **Tebex.js** for a fully embedded checkout experience. Users never leave your website!
+
+**Flow:**
+1. User clicks "Purchase" button
+2. System creates a new basket via Headless API
+3. Package is added to the basket
+4. Tebex.js modal opens on your site (dark theme with neon cyan accents)
+5. User completes payment in the embedded checkout
+6. Purchase confirmation shown via toast notification
+7. Commands are executed on your FiveM server automatically
+
+**Benefits:**
+- ✅ Users never leave your website
+- ✅ Seamless, branded experience
+- ✅ Dark theme matches your site design
+- ✅ Real-time checkout events
+- ✅ Better conversion rates
+
+### Technical Implementation
+
+The checkout integration uses:
+- **Tebex.js** (`https://js.tebex.io/v/1.4.0/`) - Loaded in `index.html`
+- **Headless API** - Creates baskets and adds packages
+- **Event Handlers** - Listens for checkout completion, closure, and errors
+- **Toast Notifications** - Provides user feedback
+
+**Code Flow:**
+```typescript
+// 1. Create basket
+const basket = await createBasket();
+
+// 2. Add package
+await addPackageToBasket(basket.ident, packageId, 1);
+
+// 3. Launch embedded checkout
+window.Tebex.checkout.init({
+  ident: basket.ident,
+  theme: 'dark',
+  colors: { primary: '#00D9FF' }
+});
+window.Tebex.checkout.launch();
+```
 
 ## Local Development
 

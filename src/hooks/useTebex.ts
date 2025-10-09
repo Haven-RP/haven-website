@@ -54,6 +54,80 @@ export interface TebexWebstore {
   webstore_url: string;
 }
 
+export interface TebexBasket {
+  ident: string;
+  complete: boolean;
+  links: {
+    checkout: string;
+    payment?: string;
+  };
+  id: number;
+  total_price: number;
+  currency: string;
+}
+
+// Create a new basket
+export const createBasket = async (): Promise<TebexBasket> => {
+  const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      complete_url: `${window.location.origin}/store?success=true`,
+      cancel_url: `${window.location.origin}/store`,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create basket: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data;
+};
+
+// Add package to basket
+export const addPackageToBasket = async (
+  basketIdent: string,
+  packageId: number,
+  quantity: number = 1
+): Promise<TebexBasket> => {
+  const response = await fetch(
+    `${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets/${basketIdent}/packages`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        package_id: packageId,
+        quantity: quantity,
+        type: 'single',
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to add package to basket: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data;
+};
+
+// Get basket details
+export const getBasket = async (basketIdent: string): Promise<TebexBasket> => {
+  const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets/${basketIdent}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch basket: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data;
+};
+
 // Fetch webstore information (derived from categories call)
 export const useTebexWebstore = () => {
   return useQuery<TebexWebstore, Error>({

@@ -14,7 +14,7 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
 - **About** - Server story, values, and feature highlights
 - **Staff** - Team showcase with roles, bios, and avatars
 - **Join/Apply** - Server requirements and joining instructions
-- **Store** - Tebex integration with packages, categories, and checkout
+- **Store** - Tebex integration with embedded checkout (users never leave your site!)
 - **Wiki** - Embedded Notion documentation
 
 ### Authenticated Features
@@ -201,14 +201,21 @@ GET https://servers-frontend.fivem.net/api/servers/single/{serverCode}
 GET https://discord.com/api/guilds/{guildId}/widget.json
 ```
 
-### Tebex Public Store API
+### Tebex Headless API
 ```
-GET https://{identifier}.tebex.io/api/information
-GET https://{identifier}.tebex.io/api/categories
-GET https://{identifier}.tebex.io/api/packages/{id}
+# Get store data
+GET https://headless.tebex.io/api/accounts/{token}/categories?includePackages=1
+GET https://headless.tebex.io/api/accounts/{token}/packages/{id}
+
+# Checkout flow
+POST https://headless.tebex.io/api/accounts/{token}/baskets
+POST https://headless.tebex.io/api/accounts/{token}/baskets/{ident}/packages
+GET https://headless.tebex.io/api/accounts/{token}/baskets/{ident}
 ```
 
 **Note:** API calls are made directly from the browser (no proxy needed)
+
+**Checkout:** Uses Tebex.js for fully embedded checkout modal
 
 ## 📜 Available Scripts
 

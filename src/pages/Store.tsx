@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ShoppingCart, Tag, ExternalLink, Sparkles } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
-import { useTebexWebstore, useTebexCategories, type TebexPackage } from "@/hooks/useTebex";
+import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasket, addPackageToBasket } from "@/hooks/useTebex";
 import { siteConfig } from "@/config/site";
+import { useToast } from "@/hooks/use-toast";
 
 const Store = () => {
   const { data: webstore, isLoading: webstoreLoading, error: webstoreError } = useTebexWebstore();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useTebexCategories();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [purchasingPackage, setPurchasingPackage] = useState<number | null>(null);
+  const { toast } = useToast();
 
   // Set first category as default when categories load
   if (categories && categories.length > 0 && selectedCategory === null) {
@@ -23,10 +26,91 @@ const Store = () => {
     }
   }
 
-  const handlePurchase = (packageId: number, packageName: string) => {
-    // Open Tebex checkout in new window using custom domain
-    const checkoutUrl = `https://${siteConfig.tebexStorefrontUrl}/package/${packageId}`;
-    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+  // Initialize Tebex.js event listeners
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Tebex) {
+      // Listen for checkout completion
+      window.Tebex.checkout.on('checkout:complete', (data) => {
+        console.log('Checkout complete:', data);
+        toast({
+          title: "Purchase Successful!",
+          description: "Thank you for your purchase. Your items will be delivered shortly.",
+          duration: 5000,
+        });
+        setPurchasingPackage(null);
+      });
+
+      // Listen for checkout close
+      window.Tebex.checkout.on('checkout:close', () => {
+        console.log('Checkout closed');
+        setPurchasingPackage(null);
+      });
+
+      // Listen for checkout errors
+      window.Tebex.checkout.on('checkout:error', (error) => {
+        console.error('Checkout error:', error);
+        toast({
+          title: "Checkout Error",
+          description: "There was an error processing your checkout. Please try again.",
+          variant: "destructive",
+          duration: 5000,
+        });
+        setPurchasingPackage(null);
+      });
+    }
+
+    // Cleanup listeners on unmount
+    return () => {
+      if (typeof window !== 'undefined' && window.Tebex) {
+        window.Tebex.checkout.off('checkout:complete');
+        window.Tebex.checkout.off('checkout:close');
+        window.Tebex.checkout.off('checkout:error');
+      }
+    };
+  }, [toast]);
+
+  const handlePurchase = async (packageId: number, packageName: string) => {
+    // Check if Tebex.js is loaded
+    if (typeof window === 'undefined' || !window.Tebex) {
+      toast({
+        title: "Checkout Unavailable",
+        description: "Please refresh the page and try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setPurchasingPackage(packageId);
+
+    try {
+      // Create a new basket
+      const basket = await createBasket();
+      
+      // Add package to basket
+      await addPackageToBasket(basket.ident, packageId, 1);
+      
+      // Initialize and launch embedded checkout
+      window.Tebex.checkout.init({
+        ident: basket.ident,
+        theme: 'dark',
+        colors: {
+          primary: '#00D9FF', // Neon cyan to match site theme
+        },
+      });
+
+      window.Tebex.checkout.launch();
+      
+    } catch (error) {
+      console.error('Error initiating checkout:', error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to start checkout. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      setPurchasingPackage(null);
+    }
   };
 
   const formatPrice = (price: number, currency: string = "USD") => {
@@ -105,10 +189,19 @@ const Store = () => {
           <Button
             className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
             onClick={() => handlePurchase(pkg.id, pkg.name)}
-            disabled={pkg.disable_quantity}
+            disabled={pkg.disable_quantity || purchasingPackage === pkg.id}
           >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            {pkg.disable_quantity ? 'Unavailable' : 'Purchase'}
+            {purchasingPackage === pkg.id ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                {pkg.disable_quantity ? 'Unavailable' : 'Purchase'}
+              </>
+            )}
           </Button>
         </CardFooter>
       </Card>
