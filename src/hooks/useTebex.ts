@@ -105,16 +105,30 @@ export const createBasketWithPackage = async (
 };
 
 // Create a new empty basket (for adding packages later)
-export const createBasket = async (): Promise<TebexBasket> => {
+export const createBasket = async (email?: string, username?: string): Promise<TebexBasket> => {
+  const requestBody: any = {
+    complete_url: `${window.location.origin}/store?success=true`,
+    cancel_url: `${window.location.origin}/store`,
+  };
+
+  // Add email if provided (allows adding packages to basket)
+  if (email) {
+    requestBody.email = email;
+  }
+
+  // Add username if provided
+  if (username) {
+    requestBody.username = username;
+  }
+
+  console.log('Creating basket with:', requestBody);
+
   const response = await fetch(`${HEADLESS_API_BASE}/accounts/${WEBSTORE_TOKEN}/baskets`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      complete_url: `${window.location.origin}/store?success=true`,
-      cancel_url: `${window.location.origin}/store`,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -124,6 +138,7 @@ export const createBasket = async (): Promise<TebexBasket> => {
   }
 
   const result = await response.json();
+  console.log('Basket created with auth:', result);
   return result.data;
 };
 

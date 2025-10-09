@@ -11,13 +11,31 @@ import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasket, 
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import Tebex from "@tebexio/tebex.js";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 const Store = () => {
   const { data: webstore, isLoading: webstoreLoading, error: webstoreError } = useTebexWebstore();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useTebexCategories();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [purchasingPackage, setPurchasingPackage] = useState<number | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+
+  // Get authenticated user
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Set first category as default when categories load
   if (categories && categories.length > 0 && selectedCategory === null) {
@@ -79,10 +97,14 @@ const Store = () => {
     setPurchasingPackage(packageId);
 
     try {
-      // Step 1: Create empty basket
-      console.log('Step 1: Creating empty basket...');
-      const emptyBasket = await createBasket();
-      console.log('Empty basket created:', emptyBasket.ident);
+      // Get user info for basket authentication
+      const userEmail = user?.email || undefined;
+      const username = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+      
+      // Step 1: Create basket with user identification
+      console.log('Step 1: Creating basket with user identification...');
+      const emptyBasket = await createBasket(userEmail, username);
+      console.log('Basket created:', emptyBasket.ident);
       
       // Step 2: Add package to basket
       console.log('Step 2: Adding package', packageId, 'to basket...');
