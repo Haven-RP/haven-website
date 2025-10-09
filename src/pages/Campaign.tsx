@@ -57,9 +57,12 @@ const Campaign = () => {
   const { data: rolesData } = useDiscordRoles(discordUserId);
 
   // Check if user is Senior Admin (by role ID)
-  const isSeniorAdmin = rolesData?.data?.roles?.some(
-    (role) => role.id === siteConfig.seniorAdminRoleId
-  ) ?? false;
+  // Note: roles is an object, so we need to convert it to an array
+  const isSeniorAdmin = rolesData?.roles
+    ? Object.values(rolesData.roles).some(
+        (role) => role.id === siteConfig.seniorAdminRoleId
+      )
+    : false;
 
   // Fetch campaigns
   const { data: campaigns, isLoading: campaignsLoading } = useCouncilCampaigns({
