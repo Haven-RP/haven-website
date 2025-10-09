@@ -105,7 +105,12 @@ export const createBasketWithPackage = async (
 };
 
 // Create a new empty basket (for adding packages later)
-export const createBasket = async (email?: string, username?: string): Promise<TebexBasket> => {
+export const createBasket = async (
+  email?: string, 
+  username?: string,
+  discordId?: string,
+  fivemCitizenId?: string
+): Promise<TebexBasket> => {
   const requestBody: any = {
     complete_url: `${window.location.origin}/store?success=true`,
     cancel_url: `${window.location.origin}/store`,
@@ -119,6 +124,22 @@ export const createBasket = async (email?: string, username?: string): Promise<T
   // Add username if provided
   if (username) {
     requestBody.username = username;
+  }
+
+  // Add custom fields for Discord and FiveM identification
+  const customFields: any = {};
+  
+  if (discordId) {
+    customFields.discord_id = discordId;
+  }
+  
+  if (fivemCitizenId) {
+    customFields.fivem_citizen_id = fivemCitizenId;
+  }
+
+  // Only add custom object if we have fields
+  if (Object.keys(customFields).length > 0) {
+    requestBody.custom = customFields;
   }
 
   console.log('Creating basket with:', requestBody);

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ShoppingCart, Tag, ExternalLink, Sparkles } from "lucide-react";
+import { Loader2, ShoppingCart, Tag, ExternalLink, Sparkles, User as UserIcon } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
 import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasket, addPackageToBasket } from "@/hooks/useTebex";
 import { siteConfig } from "@/config/site";
@@ -13,6 +13,23 @@ import { useToast } from "@/hooks/use-toast";
 import Tebex from "@tebexio/tebex.js";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useFivemCharacters } from "@/hooks/useFivemCharacters";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Store = () => {
   const { data: webstore, isLoading: webstoreLoading, error: webstoreError } = useTebexWebstore();
@@ -20,17 +37,38 @@ const Store = () => {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [purchasingPackage, setPurchasingPackage] = useState<number | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [discordUserId, setDiscordUserId] = useState<string | null>(null);
+  const [showCharacterDialog, setShowCharacterDialog] = useState(false);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [pendingPackage, setPendingPackage] = useState<{ id: number; name: string } | null>(null);
   const { toast } = useToast();
+
+  // Fetch characters for logged-in user
+  const { data: charactersData } = useFivemCharacters(discordUserId);
 
   // Get authenticated user
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session) {
+        const discordId = session.user.user_metadata?.provider_id || 
+                         session.user.user_metadata?.sub ||
+                         session.user.identities?.[0]?.id;
+        setDiscordUserId(discordId);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
+        if (session) {
+          const discordId = session.user.user_metadata?.provider_id || 
+                           session.user.user_metadata?.sub ||
+                           session.user.identities?.[0]?.id;
+          setDiscordUserId(discordId);
+        } else {
+          setDiscordUserId(null);
+        }
       }
     );
 
@@ -94,21 +132,57 @@ const Store = () => {
   }, [toast, setPurchasingPackage]);
 
   const handlePurchase = async (packageId: number, packageName: string) => {
-    setPurchasingPackage(packageId);
+    // Check if user is logged in
+    if (!user || !discordUserId) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in with Discord to make a purchase.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Check if user has characters
+    if (!charactersData || charactersData.characters.length === 0) {
+      toast({
+        title: "No Characters Found",
+        description: "You need to have at least one FiveM character to make a purchase. Please create a character in-game first.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
+    // Store pending package and show character selection dialog
+    setPendingPackage({ id: packageId, name: packageName });
+    setShowCharacterDialog(true);
+  };
+
+  const proceedWithCheckout = async () => {
+    if (!pendingPackage || !selectedCharacterId || !user || !discordUserId) {
+      return;
+    }
+
+    setShowCharacterDialog(false);
+    setPurchasingPackage(pendingPackage.id);
 
     try {
       // Get user info for basket authentication
-      const userEmail = user?.email || undefined;
-      const username = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+      const userEmail = user.email || undefined;
+      const username = user.user_metadata?.full_name || user.user_metadata?.name || undefined;
       
-      // Step 1: Create basket with user identification
+      // Step 1: Create basket with user identification including Discord & FiveM info
       console.log('Step 1: Creating basket with user identification...');
-      const emptyBasket = await createBasket(userEmail, username);
+      console.log('Discord ID:', discordUserId);
+      console.log('Citizen ID:', selectedCharacterId);
+      
+      const emptyBasket = await createBasket(userEmail, username, discordUserId, selectedCharacterId);
       console.log('Basket created:', emptyBasket.ident);
       
       // Step 2: Add package to basket
-      console.log('Step 2: Adding package', packageId, 'to basket...');
-      const basket = await addPackageToBasket(emptyBasket.ident, packageId, 1);
+      console.log('Step 2: Adding package', pendingPackage.id, 'to basket...');
+      const basket = await addPackageToBasket(emptyBasket.ident, pendingPackage.id, 1);
       console.log('Package added, final basket:', basket);
       
       // Step 3: Initialize and launch embedded checkout
@@ -125,6 +199,10 @@ const Store = () => {
       });
 
       Tebex.checkout.launch();
+      
+      // Reset states
+      setPendingPackage(null);
+      setSelectedCharacterId(null);
       
     } catch (error) {
       console.error('Error initiating checkout:', error);
@@ -385,6 +463,74 @@ const Store = () => {
 
         <Footer />
       </div>
+
+      {/* Character Selection Dialog */}
+      <Dialog open={showCharacterDialog} onOpenChange={setShowCharacterDialog}>
+        <DialogContent className="bg-card/95 backdrop-blur-lg border-primary/30">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              <span className="text-neon-cyan">Select </span>
+              <span className="text-neon-magenta">Character</span>
+            </DialogTitle>
+            <DialogDescription>
+              Choose which character should receive this purchase
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Label htmlFor="character-select" className="text-sm font-medium mb-2 block">
+              Your Characters
+            </Label>
+            <Select value={selectedCharacterId || ""} onValueChange={setSelectedCharacterId}>
+              <SelectTrigger id="character-select" className="bg-background/50 border-primary/30">
+                <SelectValue placeholder="Select a character..." />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-primary/30">
+                {charactersData?.characters.map((character) => (
+                  <SelectItem key={character.id} value={character.citizenid}>
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="w-4 h-4 text-primary" />
+                      <span>
+                        {character.charinfoData.firstname} {character.charinfoData.lastname}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        ({character.citizenid})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {selectedCharacterId && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                ✓ Items will be delivered to this character in-game
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCharacterDialog(false);
+                setPendingPackage(null);
+                setSelectedCharacterId(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
+              onClick={proceedWithCheckout}
+              disabled={!selectedCharacterId}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Proceed to Checkout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
   );
 };
