@@ -14,7 +14,7 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
 - **About** - Server story, values, and feature highlights
 - **Staff** - Team showcase with roles, bios, and avatars
 - **Join/Apply** - Server requirements and joining instructions
-- **Store** - Tebex integration with embedded checkout (users never leave your site!)
+- **Store** - Tebex.js NPM package integration with embedded checkout (users never leave your site!)
 - **Wiki** - Embedded Notion documentation
 
 ### Authenticated Features

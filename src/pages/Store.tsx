@@ -10,13 +10,13 @@ import pageBg from "@/assets/page-bg.png";
 import { useTebexWebstore, useTebexCategories, type TebexPackage, createBasket, addPackageToBasket } from "@/hooks/useTebex";
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
+import Tebex from "@tebexio/tebex.js";
 
 const Store = () => {
   const { data: webstore, isLoading: webstoreLoading, error: webstoreError } = useTebexWebstore();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useTebexCategories();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [purchasingPackage, setPurchasingPackage] = useState<number | null>(null);
-  const [tebexLoaded, setTebexLoaded] = useState(false);
   const { toast } = useToast();
 
   // Set first category as default when categories load
@@ -27,92 +27,55 @@ const Store = () => {
     }
   }
 
-  // Check if Tebex.js is loaded
-  useEffect(() => {
-    const checkTebexLoaded = () => {
-      if (typeof window !== 'undefined' && window.Tebex) {
-        console.log('Tebex.js loaded successfully');
-        setTebexLoaded(true);
-        return true;
-      }
-      return false;
-    };
-
-    // Check immediately
-    if (checkTebexLoaded()) return;
-
-    // If not loaded, check every 100ms for up to 5 seconds
-    let attempts = 0;
-    const maxAttempts = 50;
-    const interval = setInterval(() => {
-      attempts++;
-      if (checkTebexLoaded()) {
-        clearInterval(interval);
-      } else if (attempts >= maxAttempts) {
-        console.error('Tebex.js failed to load after 5 seconds');
-        clearInterval(interval);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Initialize Tebex.js event listeners
   useEffect(() => {
-    if (tebexLoaded && typeof window !== 'undefined' && window.Tebex) {
-      // Listen for checkout completion
-      window.Tebex.checkout.on('checkout:complete', (data) => {
-        console.log('Checkout complete:', data);
-        toast({
-          title: "Purchase Successful!",
-          description: "Thank you for your purchase. Your items will be delivered shortly.",
-          duration: 5000,
-        });
-        setPurchasingPackage(null);
+    // Listen for checkout completion
+    const handleComplete = (data: any) => {
+      console.log('Payment complete:', data);
+      toast({
+        title: "Purchase Successful!",
+        description: "Thank you for your purchase. Your items will be delivered shortly.",
+        duration: 5000,
       });
-
-      // Listen for checkout close
-      window.Tebex.checkout.on('checkout:close', () => {
-        console.log('Checkout closed');
-        setPurchasingPackage(null);
-      });
-
-      // Listen for checkout errors
-      window.Tebex.checkout.on('checkout:error', (error) => {
-        console.error('Checkout error:', error);
-        toast({
-          title: "Checkout Error",
-          description: "There was an error processing your checkout. Please try again.",
-          variant: "destructive",
-          duration: 5000,
-        });
-        setPurchasingPackage(null);
-      });
-    }
-
-    // Cleanup listeners on unmount
-    return () => {
-      if (typeof window !== 'undefined' && window.Tebex) {
-        window.Tebex.checkout.off('checkout:complete');
-        window.Tebex.checkout.off('checkout:close');
-        window.Tebex.checkout.off('checkout:error');
-      }
+      setPurchasingPackage(null);
     };
-  }, [tebexLoaded, toast]);
+
+    // Listen for checkout close
+    const handleClose = () => {
+      console.log('Checkout closed');
+      setPurchasingPackage(null);
+    };
+
+    // Listen for payment errors
+    const handleError = (error: any) => {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: "There was an error processing your payment. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      setPurchasingPackage(null);
+    };
+
+    // Listen for checkout open
+    const handleOpen = () => {
+      console.log('Checkout opened');
+    };
+
+    // Register event listeners
+    Tebex.checkout.on('payment:complete', handleComplete);
+    Tebex.checkout.on('close', handleClose);
+    Tebex.checkout.on('payment:error', handleError);
+    Tebex.checkout.on('open', handleOpen);
+
+    // Cleanup is handled automatically by Tebex.js
+    return () => {
+      // No manual cleanup needed
+    };
+  }, [toast, setPurchasingPackage]);
 
   const handlePurchase = async (packageId: number, packageName: string) => {
-    // Check if Tebex.js is loaded
-    if (!tebexLoaded || typeof window === 'undefined' || !window.Tebex) {
-      console.error('Tebex.js not loaded. tebexLoaded:', tebexLoaded, 'window.Tebex:', typeof window !== 'undefined' ? !!window.Tebex : 'undefined');
-      toast({
-        title: "Checkout Unavailable",
-        description: "Tebex checkout is still loading. Please wait a moment and try again.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-
     setPurchasingPackage(packageId);
 
     try {
@@ -123,15 +86,19 @@ const Store = () => {
       await addPackageToBasket(basket.ident, packageId, 1);
       
       // Initialize and launch embedded checkout
-      window.Tebex.checkout.init({
+      console.log('Launching embedded checkout with basket:', basket.ident);
+      Tebex.checkout.init({
         ident: basket.ident,
         theme: 'dark',
-        colors: {
-          primary: '#00D9FF', // Neon cyan to match site theme
-        },
+        colors: [
+          {
+            name: 'primary',
+            color: '#00D9FF', // Neon cyan to match site theme
+          },
+        ],
       });
 
-      window.Tebex.checkout.launch();
+      Tebex.checkout.launch();
       
     } catch (error) {
       console.error('Error initiating checkout:', error);
@@ -221,17 +188,12 @@ const Store = () => {
           <Button
             className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
             onClick={() => handlePurchase(pkg.id, pkg.name)}
-            disabled={pkg.disable_quantity || purchasingPackage === pkg.id || !tebexLoaded}
+            disabled={pkg.disable_quantity || purchasingPackage === pkg.id}
           >
             {purchasingPackage === pkg.id ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Loading...
-              </>
-            ) : !tebexLoaded ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Initializing...
               </>
             ) : (
               <>

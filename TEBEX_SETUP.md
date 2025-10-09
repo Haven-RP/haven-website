@@ -146,13 +146,22 @@ The store uses **Tebex.js** for a fully embedded checkout experience. Users neve
 ### Technical Implementation
 
 The checkout integration uses:
-- **Tebex.js** (`https://js.tebex.io/v/1.4.0/`) - Loaded in `index.html`
+- **@tebexio/tebex.js** NPM package - Imported directly in React components
 - **Headless API** - Creates baskets and adds packages
-- **Event Handlers** - Listens for checkout completion, closure, and errors
+- **Event Handlers** - Listens for payment completion, closure, and errors
 - **Toast Notifications** - Provides user feedback
+
+**Installation:**
+```bash
+npm install @tebexio/tebex.js
+# or
+bun add @tebexio/tebex.js
+```
 
 **Code Flow:**
 ```typescript
+import Tebex from "@tebexio/tebex.js";
+
 // 1. Create basket
 const basket = await createBasket();
 
@@ -160,12 +169,18 @@ const basket = await createBasket();
 await addPackageToBasket(basket.ident, packageId, 1);
 
 // 3. Launch embedded checkout
-window.Tebex.checkout.init({
+Tebex.checkout.init({
   ident: basket.ident,
   theme: 'dark',
-  colors: { primary: '#00D9FF' }
+  colors: [
+    { name: 'primary', color: '#00D9FF' }
+  ]
 });
-window.Tebex.checkout.launch();
+Tebex.checkout.launch();
+
+// 4. Listen for events
+Tebex.checkout.on('payment:complete', () => { /* ... */ });
+Tebex.checkout.on('close', () => { /* ... */ });
 ```
 
 ## Local Development
