@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -16,6 +16,8 @@ import {
   AlertCircle,
   Users,
   Shield,
+  Search,
+  Check,
 } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
 import {
@@ -42,6 +44,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDiscordRoles } from "@/hooks/useDiscordRoles";
 import { siteConfig } from "@/config/site";
+import { useDiscordUsers, getDisplayName } from "@/hooks/useDiscordUsers";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Campaign = () => {
   const navigate = useNavigate();
@@ -51,10 +55,14 @@ const Campaign = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [showNominateDialog, setShowNominateDialog] = useState(false);
   const [showVoteDialog, setShowVoteDialog] = useState(false);
-  const [nomineeDiscordId, setNomineeDiscordId] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch user's Discord roles
   const { data: rolesData } = useDiscordRoles(discordUserId);
+
+  // Fetch Discord users for nomination
+  const { data: discordUsers, isLoading: usersLoading } = useDiscordUsers();
 
   // Check if user is Senior Admin (by role ID)
   // Note: roles is an object, so we need to convert it to an array
@@ -126,22 +134,26 @@ const Campaign = () => {
   }, [campaigns, selectedCampaign]);
 
   const handleNominate = async () => {
-    if (!selectedCampaign || !nomineeDiscordId.trim()) return;
+    if (!selectedCampaign || !selectedUserId) return;
+
+    const selectedUser = discordUsers?.find(u => u.id === selectedUserId);
+    const displayName = selectedUser ? getDisplayName(selectedUser) : selectedUserId;
 
     try {
       await nominateMutation.mutateAsync({
         campaignId: selectedCampaign.id,
-        nomineeDiscordId: nomineeDiscordId.trim(),
+        nomineeDiscordId: selectedUserId,
       });
 
       toast({
         title: "Nomination Successful!",
-        description: `You have nominated a user for ${selectedCampaign.title}`,
+        description: `You have nominated ${displayName} for ${selectedCampaign.title}`,
         duration: 3000,
       });
 
       setShowNominateDialog(false);
-      setNomineeDiscordId("");
+      setSelectedUserId("");
+      setSearchQuery("");
     } catch (error) {
       toast({
         title: "Nomination Failed",
@@ -461,33 +473,137 @@ const Campaign = () => {
 
       {/* Nominate Dialog */}
       <Dialog open={showNominateDialog} onOpenChange={setShowNominateDialog}>
-        <DialogContent className="bg-card/95 backdrop-blur-lg border-primary/30">
+        <DialogContent className="bg-card/95 backdrop-blur-lg border-primary/30 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl">
               <span className="text-neon-cyan">Nominate </span>
               <span className="text-neon-magenta">User</span>
             </DialogTitle>
             <DialogDescription>
-              Enter the Discord ID of the user you want to nominate
+              Select a user from the Discord server to nominate
               {selectedCampaign?.allow_self_nomination &&
-                " (or your own ID to self-nominate)"}
+                " (you can nominate yourself)"}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
-            <Label htmlFor="nominee-discord-id" className="text-sm font-medium mb-2 block">
-              Discord User ID
-            </Label>
-            <Input
-              id="nominee-discord-id"
-              placeholder="123456789012345678"
-              value={nomineeDiscordId}
-              onChange={(e) => setNomineeDiscordId(e.target.value)}
-              className="bg-background/50 border-primary/30"
-            />
-            <p className="mt-2 text-xs text-muted-foreground">
-              Right-click a user in Discord → Copy User ID
-            </p>
+          <div className="py-4 space-y-4">
+            {/* Search/Autocomplete Input */}
+            <div className="space-y-2">
+              <Label htmlFor="user-search" className="text-sm font-medium">
+                Search User
+              </Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                <Input
+                  id="user-search"
+                  placeholder="Type a name to search..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    // Clear selection when typing
+                    if (selectedUserId && e.target.value !== "") {
+                      const selectedUser = discordUsers?.find(u => u.id === selectedUserId);
+                      if (selectedUser && getDisplayName(selectedUser) !== e.target.value) {
+                        setSelectedUserId("");
+                      }
+                    }
+                  }}
+                  className="bg-background/50 border-primary/30 pl-9"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+
+            {/* User List - Show when searching or no selection */}
+            {usersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                {(() => {
+                  const filteredUsers = discordUsers?.filter((user) => {
+                    if (!searchQuery.trim()) return true;
+                    const displayName = getDisplayName(user).toLowerCase();
+                    const query = searchQuery.toLowerCase().trim();
+                    return (
+                      displayName.includes(query) ||
+                      user.username.toLowerCase().includes(query) ||
+                      user.id.includes(query)
+                    );
+                  }) || [];
+
+                  return (
+                    <>
+                      <ScrollArea className="h-[300px] rounded-md border border-primary/30 bg-background/30">
+                        <div className="p-2 space-y-1">
+                          {filteredUsers.length > 0 ? (
+                            filteredUsers.slice(0, 50).map((user) => (
+                              <button
+                                key={user.id}
+                                onClick={() => {
+                                  setSelectedUserId(user.id);
+                                  setSearchQuery(getDisplayName(user));
+                                }}
+                                className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-primary/10 transition-colors text-left ${
+                                  selectedUserId === user.id
+                                    ? "bg-primary/20 border border-primary/50"
+                                    : "border border-transparent"
+                                }`}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-foreground truncate">
+                                    {getDisplayName(user)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    @{user.username}
+                                  </p>
+                                </div>
+                                {selectedUserId === user.id && (
+                                  <Check className="w-4 h-4 text-primary flex-shrink-0 ml-2" />
+                                )}
+                              </button>
+                            ))
+                          ) : (
+                            <p className="text-center text-muted-foreground py-8">
+                              {searchQuery.trim() ? "No users found" : "Start typing to search..."}
+                            </p>
+                          )}
+                          
+                          {filteredUsers.length > 50 && (
+                            <p className="text-center text-xs text-muted-foreground py-2">
+                              Showing first 50 of {filteredUsers.length} results. Keep typing to narrow down.
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+
+                      {/* Results count */}
+                      {searchQuery.trim() && (
+                        <p className="text-xs text-muted-foreground">
+                          {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} found
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
+              </>
+            )}
+
+            {/* Selected User Confirmation */}
+            {selectedUserId && discordUsers && (
+              <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Selected:</p>
+                    <p className="font-medium">
+                      {getDisplayName(discordUsers.find(u => u.id === selectedUserId)!)}
+                    </p>
+                  </div>
+                  <Check className="w-5 h-5 text-green-500" />
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -495,14 +611,15 @@ const Campaign = () => {
               variant="outline"
               onClick={() => {
                 setShowNominateDialog(false);
-                setNomineeDiscordId("");
+                setSelectedUserId("");
+                setSearchQuery("");
               }}
             >
               Cancel
             </Button>
             <Button
               onClick={handleNominate}
-              disabled={!nomineeDiscordId.trim() || nominateMutation.isPending}
+              disabled={!selectedUserId || nominateMutation.isPending}
               className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
             >
               {nominateMutation.isPending ? (
