@@ -18,6 +18,7 @@ import {
   Shield,
   Search,
   Check,
+  X,
 } from "lucide-react";
 import pageBg from "@/assets/page-bg.png";
 import {
@@ -27,6 +28,7 @@ import {
   useMyVote,
   useNominateUser,
   useVoteForNominee,
+  useDeleteMyNomination,
   type Campaign,
 } from "@/hooks/useCouncilCampaigns";
 import { useToast } from "@/hooks/use-toast";
@@ -89,6 +91,7 @@ const Campaign = () => {
   // Mutations
   const nominateMutation = useNominateUser();
   const voteMutation = useVoteForNominee();
+  const deleteNominationMutation = useDeleteMyNomination();
 
   // Get authenticated user
   useEffect(() => {
@@ -190,6 +193,29 @@ const Campaign = () => {
       toast({
         title: "Vote Failed",
         description: error instanceof Error ? error.message : "Failed to vote",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
+  const handleDeleteNomination = async () => {
+    if (!selectedCampaign || !myNomination) return;
+
+    const displayName = getNomineeDisplayName(myNomination.nominee_discord_id) || myNomination.nominee_username;
+
+    try {
+      await deleteNominationMutation.mutateAsync(selectedCampaign.id);
+
+      toast({
+        title: "Nomination Removed",
+        description: `Your nomination for ${displayName} has been removed`,
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Deletion Failed",
+        description: error instanceof Error ? error.message : "Failed to delete nomination",
         variant: "destructive",
         duration: 3000,
       });
@@ -362,10 +388,25 @@ const Campaign = () => {
                           </div>
 
                           {myNomination && (
-                            <p className="mt-3 text-sm text-muted-foreground">
-                              ✓ You nominated:{" "}
-                              {getNomineeDisplayName(myNomination.nominee_discord_id) || myNomination.nominee_username}
-                            </p>
+                            <div className="mt-3 flex items-center gap-2">
+                              <p className="text-sm text-muted-foreground">
+                                ✓ You nominated:{" "}
+                                <span className="font-medium text-foreground">
+                                  {getNomineeDisplayName(myNomination.nominee_discord_id) || myNomination.nominee_username}
+                                </span>
+                              </p>
+                              {selectedCampaign?.status === "nominations_open" && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={handleDeleteNomination}
+                                  disabled={deleteNominationMutation.isPending}
+                                  className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              )}
+                            </div>
                           )}
 
                           {myVote && nominees && (
@@ -538,7 +579,15 @@ const Campaign = () => {
             ) : (
               <>
                 {(() => {
+                  // Get list of already nominated user IDs
+                  const nominatedUserIds = new Set(
+                    nominees?.map(n => n.nominee_discord_id) || []
+                  );
+
                   const filteredUsers = discordUsers?.filter((user) => {
+                    // Exclude already nominated users
+                    if (nominatedUserIds.has(user.id)) return false;
+                    
                     if (!searchQuery.trim()) return true;
                     const displayName = getDisplayName(user).toLowerCase();
                     const query = searchQuery.toLowerCase().trim();

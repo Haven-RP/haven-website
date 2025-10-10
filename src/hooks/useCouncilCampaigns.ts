@@ -325,6 +325,36 @@ export const useNominateUser = () => {
   });
 };
 
+// Delete my nomination
+export const useDeleteMyNomination = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (campaignId: number) => {
+      const token = await getAuthToken();
+
+      const response = await fetch(`${API_URL}/council/campaigns/${campaignId}/my-nomination`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "X-API-Key": API_KEY,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || error.message || `Failed to delete nomination: ${response.status}`);
+      }
+
+      return await response.json();
+    },
+    onSuccess: (_, campaignId) => {
+      queryClient.invalidateQueries({ queryKey: ["council-nominees", campaignId] });
+      queryClient.invalidateQueries({ queryKey: ["my-nomination", campaignId] });
+    },
+  });
+};
+
 // Vote for nominee
 export const useVoteForNominee = () => {
   const queryClient = useQueryClient();
