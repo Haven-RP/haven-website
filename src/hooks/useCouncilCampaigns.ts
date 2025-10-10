@@ -205,6 +205,19 @@ export const useCreateCampaign = () => {
     }) => {
       const token = await getAuthToken();
 
+      const requestBody = {
+        title: data.title,
+        description: data.description,
+        allow_self_nomination: data.allow_self_nomination,
+        max_nominations_per_user: data.max_nominations_per_user,
+        // API expects eligible_roles as CSV string
+        eligible_roles: data.allowed_role_ids && data.allowed_role_ids.length > 0
+          ? data.allowed_role_ids.join(",")
+          : undefined,
+      };
+
+      console.log("Creating campaign with payload:", JSON.stringify(requestBody, null, 2));
+
       const response = await fetch(`${API_URL}/council/campaigns`, {
         method: "POST",
         headers: {
@@ -212,16 +225,7 @@ export const useCreateCampaign = () => {
           "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
-        body: JSON.stringify({
-          title: data.title,
-          description: data.description,
-          allow_self_nomination: data.allow_self_nomination,
-          max_nominations_per_user: data.max_nominations_per_user,
-          // API expects eligible_roles as CSV string
-          eligible_roles: data.allowed_role_ids && data.allowed_role_ids.length > 0
-            ? data.allowed_role_ids.join(",")
-            : undefined,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
