@@ -127,18 +127,7 @@ const Staff = () => {
       color: "text-accent",
       borderColor: "border-accent/30",
       bio: "Balancing gangs and city life! Bubbles helps with gang administration while also running in-city reports for the community.",
-    },
-    {
-      name: "Green",
-      rank: "Moderator",
-      role: "Gang Administration",
-      avatar:
-          "https://cdn.discordapp.com/avatars/627694365896343582/79a043698c82992ee425cec035c7e747.webp?size=80",
-      icon: Shield,
-      color: "text-blue-accent",
-      borderColor: "border-blue-accent/30",
-      bio: "Fresh on the staff team — Green is stepping into the world of gang administration and already making waves.",
-    },
+    }
   ];
 
   // Group staff by their ranks
