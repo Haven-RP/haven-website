@@ -38,10 +38,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useDiscordRoles } from "@/hooks/useDiscordRoles";
 import { siteConfig } from "@/config/site";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -332,9 +332,10 @@ const CampaignAdmin = () => {
                               {getStatusBadge(campaign.status)}
                             </div>
                             {campaign.description && (
-                              <CardDescription className="text-base">
-                                {campaign.description}
-                              </CardDescription>
+                              <div 
+                                className="prose prose-sm max-w-none text-muted-foreground prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground"
+                                dangerouslySetInnerHTML={{ __html: campaign.description }}
+                              />
                             )}
                             <div className="mt-3 flex gap-4 text-sm text-muted-foreground">
                               <span>
@@ -449,13 +450,13 @@ const CampaignAdmin = () => {
 
             <div>
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe the campaign and what it's for..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="bg-background/50 border-primary/30 mt-1 min-h-[100px]"
-              />
+              <div className="mt-1">
+                <RichTextEditor
+                  content={description}
+                  onChange={setDescription}
+                  placeholder="Describe the campaign and what it's for..."
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-between p-4 bg-background/30 rounded-lg border border-primary/20">

@@ -354,9 +354,10 @@ const Campaign = () => {
                           {getStatusBadge(selectedCampaign.status)}
                         </div>
                         {selectedCampaign.description && (
-                          <CardDescription className="text-base">
-                            {selectedCampaign.description}
-                          </CardDescription>
+                          <div 
+                            className="prose prose-sm max-w-none text-muted-foreground prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground"
+                            dangerouslySetInnerHTML={{ __html: selectedCampaign.description }}
+                          />
                         )}
                       </CardHeader>
 
