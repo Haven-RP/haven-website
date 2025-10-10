@@ -12,7 +12,7 @@ export interface Campaign {
   status: "draft" | "nominations_open" | "voting_open" | "closed";
   allow_self_nomination: boolean;
   max_nominations_per_user: number;
-  allowed_role_ids?: string[]; // optional CSV list on server, array on client
+  eligible_roles?: string; // CSV string from API
   created_at: string;
   updated_at?: string;
 }
@@ -201,7 +201,7 @@ export const useCreateCampaign = () => {
       description?: string;
       allow_self_nomination?: boolean;
       max_nominations_per_user?: number;
-      allowed_role_ids?: string[];
+      allowed_role_ids?: string[]; // We accept array from UI, convert to CSV for API
     }) => {
       const token = await getAuthToken();
 
@@ -213,10 +213,13 @@ export const useCreateCampaign = () => {
           "X-API-Key": API_KEY,
         },
         body: JSON.stringify({
-          ...data,
-          // send as CSV if API expects CSV; else server can accept array
-          allowed_role_ids: data.allowed_role_ids && data.allowed_role_ids.length > 0
-            ? data.allowed_role_ids
+          title: data.title,
+          description: data.description,
+          allow_self_nomination: data.allow_self_nomination,
+          max_nominations_per_user: data.max_nominations_per_user,
+          // API expects eligible_roles as CSV string
+          eligible_roles: data.allowed_role_ids && data.allowed_role_ids.length > 0
+            ? data.allowed_role_ids.join(",")
             : undefined,
         }),
       });
@@ -241,7 +244,9 @@ export const useUpdateCampaign = () => {
   return useMutation({
     mutationFn: async ({ campaignId, data }: {
       campaignId: number;
-      data: Partial<Pick<Campaign, "title" | "description" | "status" | "allowed_role_ids">>;
+      data: Partial<Pick<Campaign, "title" | "description" | "status">> & {
+        allowed_role_ids?: string[]; // We accept array from UI, convert to CSV for API
+      };
     }) => {
       const token = await getAuthToken();
 
@@ -254,11 +259,12 @@ export const useUpdateCampaign = () => {
         },
         body: JSON.stringify({
           ...data,
-          allowed_role_ids: data.allowed_role_ids && data.allowed_role_ids.length
-            ? data.allowed_role_ids
+          // Convert allowed_role_ids array to eligible_roles CSV string for API
+          eligible_roles: data.allowed_role_ids && data.allowed_role_ids.length > 0
+            ? data.allowed_role_ids.join(",")
             : data.allowed_role_ids === undefined
               ? undefined
-              : [],
+              : "",
         }),
       });
 

@@ -223,6 +223,12 @@ const CampaignAdmin = () => {
     }
   };
 
+  // Helper to convert CSV string to array
+  const csvToArray = (csv?: string): string[] => {
+    if (!csv) return [];
+    return csv.split(",").map(id => id.trim()).filter(Boolean);
+  };
+
   const resetForm = () => {
     setTitle("");
     setDescription("");
@@ -353,6 +359,11 @@ const CampaignAdmin = () => {
                               <span>
                                 Max nominations: {campaign.max_nominations_per_user}
                               </span>
+                              {campaign.eligible_roles && (
+                                <span>
+                                  Eligible roles: {csvToArray(campaign.eligible_roles).length} selected
+                                </span>
+                              )}
                             </div>
                           </div>
 

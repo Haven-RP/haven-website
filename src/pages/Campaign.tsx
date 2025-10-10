@@ -66,8 +66,8 @@ const Campaign = () => {
   // Fetch Discord users for nomination, filtered by allowed roles if configured
   const { data: discordUsers, isLoading: usersLoading } = useDiscordUsers({
     excludeBots: true,
-    roleIds: selectedCampaign?.allowed_role_ids && selectedCampaign.allowed_role_ids.length > 0
-      ? selectedCampaign.allowed_role_ids
+    roleIds: selectedCampaign?.eligible_roles
+      ? selectedCampaign.eligible_roles.split(",").map(id => id.trim()).filter(Boolean)
       : undefined,
   });
 
