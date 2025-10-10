@@ -144,6 +144,7 @@ export const useMyNomination = (campaignId: number | null) => {
       const response = await fetch(`${API_URL}/council/campaigns/${campaignId}/my-nomination`, {
         headers: {
           "accept": "application/json",
+          "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
       });
@@ -172,6 +173,7 @@ export const useMyVote = (campaignId: number | null) => {
       const response = await fetch(`${API_URL}/council/campaigns/${campaignId}/my-vote`, {
         headers: {
           "accept": "application/json",
+          "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
       });
@@ -205,6 +207,7 @@ export const useCreateCampaign = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
         body: JSON.stringify(data),
@@ -238,6 +241,7 @@ export const useUpdateCampaign = () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
         body: JSON.stringify(data),
@@ -301,6 +305,7 @@ export const useNominateUser = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
         body: JSON.stringify({ nominee_discord_id: nomineeDiscordId }),
@@ -335,6 +340,7 @@ export const useVoteForNominee = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
         body: JSON.stringify({ nominee_discord_id: nomineeDiscordId }),
