@@ -29,6 +29,7 @@ import {
   useNominateUser,
   useVoteForNominee,
   useDeleteMyNomination,
+  useDeleteNomination,
   type Campaign,
 } from "@/hooks/useCouncilCampaigns";
 import { useToast } from "@/hooks/use-toast";
@@ -97,6 +98,7 @@ const Campaign = () => {
   const nominateMutation = useNominateUser();
   const voteMutation = useVoteForNominee();
   const deleteNominationMutation = useDeleteMyNomination();
+  const deleteAnyNominationMutation = useDeleteNomination();
 
   // Get authenticated user
   useEffect(() => {
@@ -215,6 +217,32 @@ const Campaign = () => {
       toast({
         title: "Nomination Removed",
         description: `Your nomination for ${displayName} has been removed`,
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Deletion Failed",
+        description: error instanceof Error ? error.message : "Failed to delete nomination",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
+  const handleDeleteAnyNomination = async (nomineeDiscordId: string) => {
+    if (!selectedCampaign) return;
+
+    const displayName = getNomineeDisplayName(nomineeDiscordId) || "Unknown User";
+
+    try {
+      await deleteAnyNominationMutation.mutateAsync({
+        campaignId: selectedCampaign.id,
+        nomineeDiscordId,
+      });
+
+      toast({
+        title: "Nomination Removed",
+        description: `Admin removed nomination for ${displayName}`,
         duration: 3000,
       });
     } catch (error) {
@@ -511,6 +539,23 @@ const Campaign = () => {
                                           className="bg-gradient-neon hover:shadow-neon-cyan transition-all duration-300"
                                         >
                                           Vote
+                                        </Button>
+                                      )}
+
+                                    {/* Admin remove button - only show during nominations phase */}
+                                    {isSeniorAdmin &&
+                                      selectedCampaign.status === "nominations_open" && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() =>
+                                            handleDeleteAnyNomination(nominee.nominee_discord_id)
+                                          }
+                                          disabled={deleteAnyNominationMutation.isPending}
+                                          className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                          title="Remove nomination (Admin)"
+                                        >
+                                          <X className="w-3 h-3" />
                                         </Button>
                                       )}
                                   </div>

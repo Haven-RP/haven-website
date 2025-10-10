@@ -380,6 +380,39 @@ export const useDeleteMyNomination = () => {
   });
 };
 
+// Delete any nomination (Admin only)
+export const useDeleteNomination = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ campaignId, nomineeDiscordId }: {
+      campaignId: number;
+      nomineeDiscordId: string;
+    }) => {
+      const token = await getAuthToken();
+
+      const response = await fetch(`${API_URL}/council/campaigns/${campaignId}/nominees/${nomineeDiscordId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "X-API-Key": API_KEY,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || error.message || `Failed to delete nomination: ${response.status}`);
+      }
+
+      return await response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["council-nominees", variables.campaignId] });
+      queryClient.invalidateQueries({ queryKey: ["my-nomination", variables.campaignId] });
+    },
+  });
+};
+
 // Vote for nominee
 export const useVoteForNominee = () => {
   const queryClient = useQueryClient();
