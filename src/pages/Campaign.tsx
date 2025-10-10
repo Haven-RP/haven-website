@@ -133,6 +133,12 @@ const Campaign = () => {
     }
   }, [campaigns, selectedCampaign]);
 
+  // Helper function to get display name for a nominee
+  const getNomineeDisplayName = (discordId: string) => {
+    const user = discordUsers?.find(u => u.id === discordId);
+    return user ? getDisplayName(user) : null;
+  };
+
   const handleNominate = async () => {
     if (!selectedCampaign || !selectedUserId) return;
 
@@ -357,18 +363,22 @@ const Campaign = () => {
 
                           {myNomination && (
                             <p className="mt-3 text-sm text-muted-foreground">
-                              ✓ You nominated: {myNomination.nominee_username}
+                              ✓ You nominated:{" "}
+                              {getNomineeDisplayName(myNomination.nominee_discord_id) || myNomination.nominee_username}
                             </p>
                           )}
 
                           {myVote && nominees && (
                             <p className="mt-3 text-sm text-muted-foreground">
                               ✓ You voted for:{" "}
-                              {
-                                nominees.find(
+                              {(() => {
+                                const nominee = nominees.find(
                                   (n) => n.nominee_discord_id === myVote.nominee_discord_id
-                                )?.nominee_username
-                              }
+                                );
+                                return nominee 
+                                  ? (getNomineeDisplayName(nominee.nominee_discord_id) || nominee.nominee_username)
+                                  : "Unknown";
+                              })()}
                             </p>
                           )}
                         </CardContent>
@@ -415,8 +425,14 @@ const Campaign = () => {
                                       )}
                                     <div>
                                       <p className="font-semibold text-foreground">
-                                        {nominee.nominee_username}
+                                        {getNomineeDisplayName(nominee.nominee_discord_id) || nominee.nominee_username}
                                       </p>
+                                      {getNomineeDisplayName(nominee.nominee_discord_id) && 
+                                        getNomineeDisplayName(nominee.nominee_discord_id) !== nominee.nominee_username && (
+                                        <p className="text-xs text-muted-foreground">
+                                          @{nominee.nominee_username}
+                                        </p>
+                                      )}
                                       <p className="text-sm text-muted-foreground">
                                         {nominee.nomination_count} nomination
                                         {nominee.nomination_count !== 1 ? "s" : ""}
