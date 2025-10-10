@@ -30,9 +30,10 @@ export const useAllDiscordRoles = () => {
         throw new Error("HavenRP API key not configured");
       }
 
-      const url = DISCORD_ROLES_API_URL.replace(/\/roles$/, "") + "/all";
+      // Use the base roles endpoint without user ID to get all roles
+      const baseUrl = DISCORD_ROLES_API_URL.replace(/\/roles\/.*$/, "/roles");
 
-      const response = await fetch(url, {
+      const response = await fetch(baseUrl, {
         headers: {
           accept: "application/json",
           "X-API-Key": DISCORD_API_KEY,
@@ -44,10 +45,8 @@ export const useAllDiscordRoles = () => {
       }
 
       const data = await response.json();
-      // Expecting { roles: DiscordRole[] } or object map; normalize to array
-      const rolesArray: DiscordRole[] = Array.isArray(data.roles)
-        ? data.roles
-        : Object.values(data.roles || {});
+      // API returns array directly
+      const rolesArray: DiscordRole[] = Array.isArray(data) ? data : [];
       // de-duplicate by id just in case
       const deduped = Array.from(new Map(rolesArray.map(r => [r.id, r])).values());
       // Sort alphabetically by name
