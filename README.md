@@ -27,6 +27,12 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
   - Full inventory modal with searchable items and metadata
   - Vehicle viewer with comprehensive details
   - Vehicle storage modal (glovebox & trunk) with search
+- **Campaigns** - Democratic election and nomination system
+  - Public campaign viewing with real-time nominee lists
+  - User nomination system with Discord user search
+  - Voting system for active campaigns
+  - Role-based access control for eligible participants
+  - Admin panel for Senior Admins to manage campaigns
 - **Account Dropdown** - Streamlined user menu in navigation (Dashboard, My Characters, Sign Out)
 
 ### Real-Time Integrations
@@ -35,6 +41,7 @@ Modern, futuristic website for HavenRP - a FiveM roleplay server. Built with Rea
 - **Discord Roles** - Automatic role fetching and display
 - **Character Data** - Live FiveM character, inventory, and vehicle sync
 - **Vehicle Data** - Real-time vehicle stats, condition, and storage
+- **Campaign Data** - Real-time campaign status, nominees, and vote counts
 
 ## 🛠️ Tech Stack
 
@@ -114,10 +121,14 @@ haven-website/
 │   │   ├── Index.tsx       # Homepage
 │   │   ├── Dashboard.tsx   # Member dashboard
 │   │   ├── MyCharacters.tsx # FiveM characters
+│   │   ├── Campaign.tsx    # Public campaign elections
+│   │   ├── CampaignAdmin.tsx # Campaign admin panel
 │   │   ├── Store.tsx       # Tebex store
 │   │   └── ...
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useDiscordRoles.ts
+│   │   ├── useDiscordUsers.ts
+│   │   ├── useCouncilCampaigns.ts # Campaign API integration
 │   │   ├── useFivemCharacters.ts
 │   │   ├── useFivemCharacter.ts
 │   │   ├── useFivemVehicles.ts
@@ -191,6 +202,24 @@ GET https://api.haven-rp.com/api/fivem/character/{citizenid}/vehicle/{plate}/inv
 Headers: X-API-Key: {VITE_HAVEN_API_KEY}
 ```
 
+#### Campaign Management
+```
+GET https://api.haven-rp.com/api/council/campaigns
+GET https://api.haven-rp.com/api/council/campaigns/{id}
+GET https://api.haven-rp.com/api/council/campaigns/{id}/nominees
+POST https://api.haven-rp.com/api/council/campaigns/{id}/nominate
+POST https://api.haven-rp.com/api/council/campaigns/{id}/vote
+DELETE https://api.haven-rp.com/api/council/campaigns/{id}/my-nomination
+DELETE https://api.haven-rp.com/api/council/campaigns/{id}/nominees/{discordId}
+Headers: Authorization: Bearer {supabase_token}, X-API-Key: {VITE_HAVEN_API_KEY}
+```
+
+#### Discord Users
+```
+GET https://api.haven-rp.com/api/discord/users?role_ids={csv}&exclude_bots=true
+Headers: X-API-Key: {VITE_HAVEN_API_KEY}
+```
+
 ### FiveM Server API
 ```
 GET https://servers-frontend.fivem.net/api/servers/single/{serverCode}
@@ -254,6 +283,7 @@ export const siteConfig = {
   // Discord
   discordInvite: "https://discord.gg/havenrp",
   discordGuildId: "1381585365466611732",
+  seniorAdminRoleId: "1414073546216308799", // Discord role ID for Senior Admin
   
   // Server Info
   serverName: "HavenRP",
@@ -294,6 +324,15 @@ Dashboard shows different content based on Discord roles:
 - **Staff/Admin** - Staff resources and tools
 - **VIP/Supporter** - Exclusive perks section
 - **All Members** - General resources
+
+### Campaign Elections
+- **Public Campaign Viewing** - Browse active and closed campaigns
+- **Nomination System** - Search and nominate Discord users with role-based filtering
+- **Voting System** - Cast votes for nominees during voting phase
+- **Admin Management** - Senior Admins can create, update, and delete campaigns
+- **Role-Based Access** - Campaigns can restrict participation to specific Discord roles
+- **Real-Time Updates** - Live nominee counts, vote tallies, and campaign status
+- **Rich Text Descriptions** - Campaign descriptions support HTML formatting
 
 ### Character Management
 - **Overview** - View all characters linked to Discord account
@@ -355,6 +394,13 @@ All modals include real-time search functionality:
 - Search by item name
 - Individual section counters
 - Real-time filtering
+
+### Campaign Search Features
+- **User Search** - Search Discord users by display name, username, or ID
+- **Role Filtering** - Automatically filter users by campaign's eligible roles
+- **Bot Exclusion** - Never show Discord bots in nomination lists
+- **Real-Time Results** - Live search with "X users found" counter
+- **Selection Confirmation** - Visual confirmation of selected nominee
 
 ## 📚 Documentation
 
