@@ -202,6 +202,12 @@ export const useCreateCampaign = () => {
       max_nominations_per_user?: number;
     }) => {
       const token = await getAuthToken();
+      
+      console.log("Creating campaign with:");
+      console.log("- URL:", `${API_URL}/council/campaigns`);
+      console.log("- Has API Key:", !!API_KEY);
+      console.log("- Has Token:", !!token);
+      console.log("- Token prefix:", token?.substring(0, 20) + "...");
 
       const response = await fetch(`${API_URL}/council/campaigns`, {
         method: "POST",
@@ -213,8 +219,17 @@ export const useCreateCampaign = () => {
         body: JSON.stringify(data),
       });
 
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
-        const error = await response.json();
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { message: errorText };
+        }
         throw new Error(error.message || `Failed to create campaign: ${response.status}`);
       }
 
