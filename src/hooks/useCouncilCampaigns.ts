@@ -12,6 +12,7 @@ export interface Campaign {
   status: "draft" | "nominations_open" | "voting_open" | "closed";
   allow_self_nomination: boolean;
   max_nominations_per_user: number;
+  allowed_role_ids?: string[]; // optional CSV list on server, array on client
   created_at: string;
   updated_at?: string;
 }
@@ -200,6 +201,7 @@ export const useCreateCampaign = () => {
       description?: string;
       allow_self_nomination?: boolean;
       max_nominations_per_user?: number;
+      allowed_role_ids?: string[];
     }) => {
       const token = await getAuthToken();
 
@@ -210,7 +212,13 @@ export const useCreateCampaign = () => {
           "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          // send as CSV if API expects CSV; else server can accept array
+          allowed_role_ids: data.allowed_role_ids && data.allowed_role_ids.length > 0
+            ? data.allowed_role_ids
+            : undefined,
+        }),
       });
 
       if (!response.ok) {
@@ -233,7 +241,7 @@ export const useUpdateCampaign = () => {
   return useMutation({
     mutationFn: async ({ campaignId, data }: {
       campaignId: number;
-      data: Partial<Pick<Campaign, "title" | "description" | "status">>;
+      data: Partial<Pick<Campaign, "title" | "description" | "status" | "allowed_role_ids">>;
     }) => {
       const token = await getAuthToken();
 
@@ -244,7 +252,14 @@ export const useUpdateCampaign = () => {
           "Authorization": `Bearer ${token}`,
           "X-API-Key": API_KEY,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          allowed_role_ids: data.allowed_role_ids && data.allowed_role_ids.length
+            ? data.allowed_role_ids
+            : data.allowed_role_ids === undefined
+              ? undefined
+              : [],
+        }),
       });
 
       if (!response.ok) {

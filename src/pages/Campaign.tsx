@@ -63,8 +63,13 @@ const Campaign = () => {
   // Fetch user's Discord roles
   const { data: rolesData } = useDiscordRoles(discordUserId);
 
-  // Fetch Discord users for nomination
-  const { data: discordUsers, isLoading: usersLoading } = useDiscordUsers();
+  // Fetch Discord users for nomination, filtered by allowed roles if configured
+  const { data: discordUsers, isLoading: usersLoading } = useDiscordUsers({
+    excludeBots: true,
+    roleIds: selectedCampaign?.allowed_role_ids && selectedCampaign.allowed_role_ids.length > 0
+      ? selectedCampaign.allowed_role_ids
+      : undefined,
+  });
 
   // Check if user is Senior Admin (by role ID)
   // Note: roles is an object, so we need to convert it to an array

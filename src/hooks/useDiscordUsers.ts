@@ -38,11 +38,20 @@ export const filterNonBots = (users: DiscordUser[]): DiscordUser[] => {
 /**
  * Hook to fetch all Discord users from the server
  */
-export const useDiscordUsers = () => {
+export const useDiscordUsers = (options?: { roleIds?: string[]; excludeBots?: boolean }) => {
   return useQuery({
-    queryKey: ["discord-users"],
+    queryKey: ["discord-users", options?.roleIds?.join(",") || "", options?.excludeBots ?? true],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/discord/users`, {
+      const params = new URLSearchParams();
+      const excludeBots = options?.excludeBots ?? true;
+      if (excludeBots) params.append("exclude_bots", "true");
+      if (options?.roleIds && options.roleIds.length > 0) {
+        params.append("role_ids", options.roleIds.join(","));
+      }
+
+      const url = `${API_URL}/discord/users${params.toString() ? `?${params.toString()}` : ""}`;
+
+      const response = await fetch(url, {
         headers: {
           "accept": "application/json",
           "X-API-Key": API_KEY,
@@ -55,8 +64,8 @@ export const useDiscordUsers = () => {
 
       const result: DiscordUsersResponse = await response.json();
       
-      // Filter out bots and return users
-      return filterNonBots(result.users);
+      // Also locally filter out bots as a safety net when excludeBots is enabled
+      return excludeBots ? filterNonBots(result.users) : result.users;
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });

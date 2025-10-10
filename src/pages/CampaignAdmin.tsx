@@ -39,7 +39,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useDiscordRoles } from "@/hooks/useDiscordRoles";
+import { useDiscordRoles, useAllDiscordRoles, DiscordRole } from "@/hooks/useDiscordRoles";
 import { siteConfig } from "@/config/site";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import {
@@ -67,6 +67,8 @@ const CampaignAdmin = () => {
   const [description, setDescription] = useState("");
   const [allowSelfNomination, setAllowSelfNomination] = useState(true);
   const [maxNominations, setMaxNominations] = useState(1);
+  const [allowedRoleIds, setAllowedRoleIds] = useState<string[]>([]);
+  const [roleSearch, setRoleSearch] = useState("");
 
   // Fetch user's Discord roles
   const { data: rolesData, isLoading: rolesLoading } = useDiscordRoles(discordUserId);
@@ -83,6 +85,9 @@ const CampaignAdmin = () => {
   const { data: campaigns, isLoading: campaignsLoading } = useCouncilCampaigns({
     include_closed: true,
   });
+
+  // Fetch all guild roles for selection
+  const { data: allRoles } = useAllDiscordRoles();
 
   // Mutations
   const createMutation = useCreateCampaign();
@@ -151,6 +156,7 @@ const CampaignAdmin = () => {
         description: description.trim() || undefined,
         allow_self_nomination: allowSelfNomination,
         max_nominations_per_user: maxNominations,
+        allowed_role_ids: allowedRoleIds,
       });
 
       toast({
@@ -222,6 +228,8 @@ const CampaignAdmin = () => {
     setDescription("");
     setAllowSelfNomination(true);
     setMaxNominations(1);
+    setAllowedRoleIds([]);
+    setRoleSearch("");
   };
 
   const getStatusBadge = (status: Campaign["status"]) => {
@@ -484,6 +492,76 @@ const CampaignAdmin = () => {
                 className="bg-background/50 border-primary/30 mt-1"
               />
             </div>
+
+          {/* Allowed Roles Multi-select */}
+          <div className="space-y-2">
+            <Label>Allowed Roles (optional)</Label>
+            <p className="text-xs text-muted-foreground">Only members with these roles can be nominated and appear in user lists.</p>
+            <div className="relative">
+              <Input
+                placeholder="Search roles by name or ID..."
+                value={roleSearch}
+                onChange={(e) => setRoleSearch(e.target.value)}
+                className="bg-background/50 border-primary/30 pr-28"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                {allowedRoleIds.length} selected
+              </div>
+            </div>
+
+            <div className="max-h-48 overflow-auto rounded-md border border-primary/20 bg-background/30">
+              <div className="p-2 space-y-1">
+                {(allRoles || [])
+                  .filter((r) => {
+                    if (!roleSearch.trim()) return true;
+                    const q = roleSearch.toLowerCase();
+                    return r.name.toLowerCase().includes(q) || r.id.includes(q);
+                  })
+                  .map((role) => {
+                    const selected = allowedRoleIds.includes(role.id);
+                    return (
+                      <button
+                        key={role.id}
+                        onClick={() => {
+                          setAllowedRoleIds((prev) =>
+                            prev.includes(role.id)
+                              ? prev.filter((id) => id !== role.id)
+                              : [...prev, role.id]
+                          );
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-left hover:bg-primary/10 ${selected ? "bg-primary/20 border border-primary/40" : ""}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: `#${role.color.toString(16).padStart(6, "0")}` }} />
+                          <span className="font-medium">{role.name}</span>
+                          <span className="text-xs text-muted-foreground">({role.id})</span>
+                        </div>
+                        {selected && <span className="text-xs text-primary">Selected</span>}
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {allowedRoleIds.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {allowedRoleIds.map((id) => {
+                  const role = (allRoles || []).find((r) => r.id === id);
+                  return (
+                    <span key={id} className="inline-flex items-center gap-2 px-2 py-1 rounded border border-primary/30 bg-background/50 text-xs">
+                      {role ? role.name : id}
+                      <button
+                        onClick={() => setAllowedRoleIds((prev) => prev.filter((rid) => rid !== id))}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           </div>
 
           <DialogFooter>
